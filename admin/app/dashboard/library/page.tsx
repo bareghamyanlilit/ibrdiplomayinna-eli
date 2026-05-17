@@ -94,20 +94,20 @@ export default function LibraryAdminPage() {
         </div>
         <select value={filterSpec} onChange={e => setFilterSpec(e.target.value)}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] bg-white">
-          <option value="">Բոլոր մասնagidzyunnery</option>
+          <option value="">Բոլոր մասնագիտություններ</option>
           {specialties.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
-      {loading ? <p className="text-gray-500">Բeռnvum e...</p> : filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm p-12 text-center text-gray-400">Ֆayler chkan</div>
+      {loading ? <p className="text-gray-500">Բեռնվում է ...</p> : filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl shadow-sm p-12 text-center text-gray-400">Ֆայլեր չկան</div>
       ) : (
         <div className="space-y-5">
           {Object.entries(grouped).map(([spec, files]) => (
             <div key={spec} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="px-5 py-3 bg-[#004471] text-white text-sm font-bold flex items-center justify-between">
                 <span>{spec}</span>
-                <span className="text-blue-200 text-xs">{files.length} ֆayл</span>
+                <span className="text-blue-200 text-xs">{files.length} ֆայլ</span>
               </div>
               <div className="divide-y divide-gray-100">
                 {files.map(f => (
@@ -135,29 +135,29 @@ export default function LibraryAdminPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="font-bold text-gray-900">{(editItem as any)._id ? 'Khmbagrel' : 'Avelacnel'} fayl</h2>
+              <h2 className="font-bold text-gray-900">{(editItem as any)._id ? 'Խմբագրել' : 'Ավելացնել'} ֆայլ</h2>
               <button onClick={close} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
             </div>
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Fayli anvanutyun</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Ֆայլի անվանում</label>
                 <input value={editItem.name || ''} onChange={e => setEditItem(p => ({ ...p!, name: e.target.value }))}
                   placeholder="Anvanumner..."
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Masnagitvutyun <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Մասնագիտություն <span className="text-red-500">*</span></label>
                 <input value={editItem.specialty || ''} onChange={e => setEditItem(p => ({ ...p!, specialty: e.target.value }))}
-                  list="spec-list" placeholder="Or. Bankayinn gorz"
+                  list="spec-list" placeholder="Օր․՝ ՀՏԱՀԾԱ"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
                 <datalist id="spec-list">{specialties.map(s => <option key={s} value={s} />)}</datalist>
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                  Fayl {!(editItem as any)._id && <span className="text-red-500">*</span>}
+                  Ֆայլ {!(editItem as any)._id && <span className="text-red-500">*</span>}
                 </label>
                 {(editItem as any)._id && (editItem as any).fileName && !newFile && (
-                  <p className="text-xs text-gray-500 mb-1">Ayjm: {(editItem as any).fileName}</p>
+                  <p className="text-xs text-gray-500 mb-1">Այժմ : {(editItem as any).fileName}</p>
                 )}
                 <input ref={fileRef} type="file" className="hidden" onChange={e => {
                   const f = e.target.files?.[0];
@@ -165,28 +165,28 @@ export default function LibraryAdminPage() {
                 }} />
                 <button type="button" onClick={() => fileRef.current?.click()}
                   className="flex items-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-[#004471] hover:text-[#004471] transition-colors w-full justify-center">
-                  <Plus size={15} /> {newFile ? newFile.name : 'Entrel fayl'}
+                  <Plus size={15} /> {newFile ? newFile.name : 'Ընտրել ֆայլը'}
                 </button>
               </div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Dasakarg (#)</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Դասակարգ (#)</label>
                   <input type="number" value={editItem.order || 0} onChange={e => setEditItem(p => ({ ...p!, order: Number(e.target.value) }))}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                 </div>
                 <div className="flex items-end pb-1">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={editItem.isPublished !== false} onChange={e => setEditItem(p => ({ ...p!, isPublished: e.target.checked }))} className="w-4 h-4 accent-[#004471]" />
-                    <span className="text-sm font-medium text-gray-700">Hrapararkvac</span>
+                    <span className="text-sm font-medium text-gray-700">Հրապարակված</span>
                   </label>
                 </div>
               </div>
               {error && <p className="text-red-600 text-xs bg-red-50 rounded px-3 py-2">{error}</p>}
               <div className="flex gap-3">
                 <button onClick={save} disabled={saving} className="flex-1 py-2.5 bg-[#004471] text-white rounded-lg font-semibold text-sm hover:bg-[#003560] disabled:opacity-60 transition-colors">
-                  {saving ? 'Pahpanvum...' : 'Pahpanel'}
+                  {saving ? 'Պահպանում...' : 'Պահպանել'}
                 </button>
-                <button onClick={close} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm">Cheghark.</button>
+                <button onClick={close} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm">Չեղարկել</button>
               </div>
             </div>
           </div>

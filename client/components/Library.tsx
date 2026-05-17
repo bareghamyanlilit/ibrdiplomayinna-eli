@@ -43,7 +43,7 @@ export function Library() {
     return acc;
   }, {} as Record<string, LibFile[]>);
 
-  if (loading) return <div className="text-center py-20 text-gray-400">Betrnvum e...</div>;
+  if (loading) return <div className="text-center py-20 text-gray-400">{data.library.loading}</div>;
 
   if (items.length === 0) return <P txt={data.library.havent} className="my-4 mx-2 text-center text-gray-500" />;
 
@@ -52,11 +52,11 @@ export function Library() {
       {/* Search + Filter */}
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Vornel fayl..."
+          placeholder={data.library.search}
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
         <select value={filterSpec} onChange={e => setFilterSpec(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] bg-white">
-          <option value="">Bolor masnagitvutyunnery</option>
+          <option value="">{data.library.all}</option>
           {specialties.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>

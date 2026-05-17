@@ -8,9 +8,9 @@ import api from '@/lib/api';
 import { Megaphone, Newspaper, Library, Plus } from 'lucide-react';
 
 const sections = [
-  { key: 'announcements', label: 'Haytararutyunner', icon: Megaphone, color: 'bg-blue-500', href: '/dashboard/announcements', newHref: '/dashboard/announcements/new', endpoint: '/announcements/admin' },
-  { key: 'news', label: 'Graruumner', icon: Newspaper, color: 'bg-emerald-500', href: '/dashboard/news', newHref: '/dashboard/news/new', endpoint: '/news/admin' },
-  { key: 'library', label: 'Gradaran', icon: Library, color: 'bg-rose-500', href: '/dashboard/library', newHref: '/dashboard/library', endpoint: '/library/admin' },
+  { key: 'announcements', label: 'Հայտարարություններ', icon: Megaphone, color: 'bg-blue-500', href: '/dashboard/announcements', newHref: '/dashboard/announcements/new', endpoint: '/announcements/admin' },
+  { key: 'news', label: 'Նորություններ', icon: Newspaper, color: 'bg-emerald-500', href: '/dashboard/news', newHref: '/dashboard/news/new', endpoint: '/news/admin' },
+  { key: 'library', label: 'Գրադարան', icon: Library, color: 'bg-rose-500', href: '/dashboard/library', newHref: '/dashboard/library', endpoint: '/library/admin' },
 ];
 
 export default function DashboardPage() {
@@ -29,7 +29,7 @@ export default function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Dashboard</h1>
-      <p className="text-gray-500 mb-8">{user ? `Bari galust, ${user.name}` : 'Betrnvum e...'}</p>
+      <p className="text-gray-500 mb-8">{user ? `Բարի գալուս, ${user.name}` : 'Բեռնվում է...'}</p>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-10">
         {sections.map(({ key, label, icon: Icon, color, href, newHref }) => (
@@ -40,7 +40,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-xs font-semibold text-gray-500 leading-tight">{label}</p>
             <div className="flex gap-2">
-              <button onClick={() => router.push(href)} className="flex-1 text-xs text-[#004471] font-medium hover:underline text-left">Ditel →</button>
+              <button onClick={() => router.push(href)} className="flex-1 text-xs text-[#004471] font-medium hover:underline text-left">Դիտել →</button>
               {newHref && (
                 <button onClick={() => router.push(newHref)} className="p-1 text-[#004471] hover:bg-blue-50 rounded transition-colors"><Plus size={14} /></button>
               )}
@@ -49,7 +49,7 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <h2 className="font-semibold text-gray-800 mb-3">Arag gorceluytnner</h2>
+      <h2 className="font-semibold text-gray-800 mb-3">Արագ գործողություններ</h2>
       <div className="flex gap-3 flex-wrap">
         {sections.filter(s => s.newHref).map(s => (
           <button key={s.key} onClick={() => router.push(s.newHref!)}
