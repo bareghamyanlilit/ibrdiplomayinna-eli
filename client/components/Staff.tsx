@@ -4,6 +4,7 @@ import React from 'react'
 import { H2 } from './title';
 import { useLanguage } from '@/context/LangContext';
 import { P } from './descr';
+import { Chairs } from './Chairs';
 
 export function Staff() {
   const { data } = useLanguage();
@@ -69,6 +70,7 @@ export function Staff() {
           </div>
         </div>
       </div>
+      <Chairs/>
 
     </div>
   )
