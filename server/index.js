@@ -28,6 +28,9 @@ app.use('/api/news', require('./routes/news'));
 app.use('/api/library', require('./routes/library'));
 
 // MongoDB-in kapcum enq .env fayli MONGODB_URI-ov
+console.log('====================================');
+console.log(process.env.MONGODB_URI);
+console.log('====================================');
 mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/epq_college')
   .then(() => console.log('✅ MongoDB connected'))

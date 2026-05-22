@@ -25,9 +25,9 @@ router.get('/', async (req, res) => {
   try {
     const { specialty, search } = req.query;
     const query = { isPublished: true };
-    if (specialty) query.specialty = specialty;
-    if (search) query.name = { $regex: search, $options: 'i' };
-    const items = await LibraryFile.find(query).sort({ specialty: 1, order: 1 });
+    if (specialty) query['specialty.am'] = specialty;
+    if (search) query['name.am'] = { $regex: search, $options: 'i' };
+    const items = await LibraryFile.find(query).sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -35,15 +35,23 @@ router.get('/', async (req, res) => {
 // GET /specialties — masnagitvutyunneri unique ternery stanel (dropdown hamar)
 router.get('/specialties', async (req, res) => {
   try {
-    const specialties = await LibraryFile.distinct('specialty', { isPublished: true });
-    res.json(specialties.sort());
+    // Return unique specialty objects (deduplicated by am value)
+    const items = await LibraryFile.find({ isPublished: true }, { specialty: 1 });
+    const seen = new Set();
+    const specialties = [];
+    for (const item of items) {
+      const key = item.specialty?.am || '';
+      if (key && !seen.has(key)) { seen.add(key); specialties.push(item.specialty); }
+    }
+    specialties.sort((a, b) => (a.am || '').localeCompare(b.am || ''));
+    res.json(specialties);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 // GET /admin — bolor failery admin-i hamar (autentificacum petk e)
 router.get('/admin', auth, async (req, res) => {
   try {
-    const items = await LibraryFile.find().sort({ specialty: 1, order: 1 });
+    const items = await LibraryFile.find().sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -53,10 +61,19 @@ router.get('/admin', auth, async (req, res) => {
 router.post('/', auth, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-    const { name, specialty, order } = req.body;
+    const { nameAm, nameRu, nameEn, specialtyAm, specialtyRu, specialtyEn, order } = req.body;
+    const fallbackName = nameAm || req.file.originalname;
     const item = await LibraryFile.create({
-      name: name || req.file.originalname,
-      specialty: specialty || 'Ընդhanuр',
+      name: {
+        am: nameAm || fallbackName,
+        ru: nameRu || fallbackName,
+        en: nameEn || fallbackName,
+      },
+      specialty: {
+        am: specialtyAm || '',
+        ru: specialtyRu || specialtyAm || '',
+        en: specialtyEn || specialtyAm || '',
+      },
       fileName: req.file.originalname,
       filePath: `/uploads/library/${req.file.filename}`,
       fileSize: req.file.size,
@@ -71,13 +88,21 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
 // Nerc fail upload anel, kkam tolk meta poxel
 router.put('/:id', auth, upload.single('file'), async (req, res) => {
   try {
-    const { name, specialty, order, isPublished } = req.body;
+    const { nameAm, nameRu, nameEn, specialtyAm, specialtyRu, specialtyEn, order, isPublished } = req.body;
     const existing = await LibraryFile.findById(req.params.id);
     if (!existing) return res.status(404).json({ message: 'Not found' });
     
     const update = {
-      name: name || existing.name,
-      specialty: specialty || existing.specialty,
+      name: {
+        am: nameAm !== undefined ? nameAm : (existing.name?.am || ''),
+        ru: nameRu !== undefined ? nameRu : (existing.name?.ru || ''),
+        en: nameEn !== undefined ? nameEn : (existing.name?.en || ''),
+      },
+      specialty: {
+        am: specialtyAm !== undefined ? specialtyAm : (existing.specialty?.am || ''),
+        ru: specialtyRu !== undefined ? specialtyRu : (existing.specialty?.ru || ''),
+        en: specialtyEn !== undefined ? specialtyEn : (existing.specialty?.en || ''),
+      },
       order: Number(order) || 0,
       isPublished: isPublished !== 'false',
     };
