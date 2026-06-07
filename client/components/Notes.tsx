@@ -37,14 +37,13 @@ export function Notes() {
   const getTitle = (item: NewsItem) => item.title[lang] || item.title.am || "";
   const getContent = (item: NewsItem) => item.content[lang] || item.content.am || "";
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(lang === "am" ? "hy-AM" : lang === "ru" ? "ru-RU" : "en-US", {
-      year: "numeric", month: "long", day: "numeric",
-    });
+  new Date(iso).toISOString().split("T")[0];
 
   if (loading) return <div className="container mx-auto my-8 px-4 text-center text-gray-400 py-12">Բեռնվում է...</div>;
 
   return (
-    <div className="container mx-auto my-8 px-4">
+    <div className="mt-10">
+    <div className="container mt-10 mx-auto my-20 px-4">
       {items.length > 0 ? (
         <div className="flex flex-col gap-6">
           {items.map((item, index) => {
@@ -80,6 +79,7 @@ export function Notes() {
       ) : (
         <P txt={data.events.notes.havent} className="my-4 mx-2 text-center text-gray-500" />
       )}
+    </div>
     </div>
   );
 }

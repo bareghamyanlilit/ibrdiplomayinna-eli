@@ -40,9 +40,7 @@ export function Events() {
   const getTitle = (item: Item) => item.title[lang] || item.title.am || "";
   const getContent = (item: Item) => item.content[lang] || item.content.am || "";
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(lang === "am" ? "hy-AM" : lang === "ru" ? "ru-RU" : "en-US", {
-      year: "numeric", month: "long", day: "numeric",
-    });
+  new Date(iso).toISOString().split("T")[0];
 
   if (loading) return <div className="container mx-auto my-8 px-4 text-center text-gray-400 py-12">Բեռնվում է...</div>;
 

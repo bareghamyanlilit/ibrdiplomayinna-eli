@@ -50,7 +50,7 @@ export default function AnnouncementsPage() {
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${item.isPublished ? 'bg-green-500' : 'bg-gray-300'}`} />
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900 truncate">{item.title.am}</p>
-                  <p className="text-xs text-gray-400">{new Date(item.createdAt).toLocaleDateString('hy-AM')}</p>
+                  <p className="text-xs text-gray-400">{new Date(item.createdAt).toISOString().split("T")[0]}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
