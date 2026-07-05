@@ -1,0 +1,118 @@
+// Ambioni stexcelu/arsknacman form
+// Boss-i anun, nkaragrutyun, lusankar
+// Staff list (textarea-ic newline-separated)
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
+import LangTabs from '@/components/LangTabs';
+
+type Lang = 'am' | 'ru' | 'en';
+type LText = { am: string; ru: string; en: string };
+const emptyL = (): LText => ({ am: '', ru: '', en: '' });
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+
+export default function ChairForm({ initial }: { initial?: any }) {
+  const router = useRouter();
+  const isEdit = !!initial?._id;
+  const [title, setTitle] = useState<LText>(initial?.title || emptyL());
+  const [descr, setDescr] = useState<LText>(initial?.descr || emptyL());
+  const [bossName, setBossName] = useState(initial?.boss?.name || '');
+  const [bossDescr, setBossDescr] = useState(initial?.boss?.descr || '');
+  const [bossSrc, setBossSrc] = useState(initial?.boss?.src || '');
+  const [bossFile, setBossFile] = useState<File | null>(null);
+  const [imgUrl, setImgUrl] = useState(initial?.img || '');
+  const [imgFile, setImgFile] = useState<File | null>(null);
+  const [staff, setStaff] = useState<string>((initial?.staff || []).join('\n'));
+  const [order, setOrder] = useState(initial?.order ?? 0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true); setError('');
+    try {
+      const fd = new FormData();
+      fd.append('titleAm', title.am); fd.append('titleRu', title.ru); fd.append('titleEn', title.en);
+      fd.append('descrAm', descr.am); fd.append('descrRu', descr.ru); fd.append('descrEn', descr.en);
+      fd.append('bossName', bossName); fd.append('bossDescr', bossDescr); fd.append('bossSrc', bossSrc);
+      fd.append('imgUrl', imgUrl);
+      fd.append('staff', staff);
+      fd.append('order', String(order));
+      if (bossFile) fd.append('bossPhoto', bossFile);
+      if (imgFile) fd.append('img', imgFile);
+      if (isEdit) await api.put(`/chairs/${initial._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      else await api.post('/chairs', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      router.push('/dashboard/chairs');
+    } catch (err: any) { setError(err?.response?.data?.message || 'Սխալ'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <h3 className="font-bold text-gray-800 border-b pb-2">Անվանում և նկարագրություն</h3>
+        <LangTabs>
+          {(lang) => (
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Անվանում ({lang.toUpperCase()}){lang === 'am' && <span className="text-red-500"> *</span>}</label>
+                <input required={lang === 'am'} value={title[lang]} onChange={e => setTitle(p => ({ ...p, [lang]: e.target.value }))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Նկարագրություն ({lang.toUpperCase()})</label>
+                <textarea rows={6} value={descr[lang]} onChange={e => setDescr(p => ({ ...p, [lang]: e.target.value }))} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y" />
+              </div>
+            </div>
+          )}
+        </LangTabs>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1">Դասակարգ</label>
+          <input type="number" value={order} onChange={e => setOrder(Number(e.target.value))} className="w-32 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <h3 className="font-bold text-gray-800 border-b pb-2">Ամբիոնի վարիչ</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Անուն Ազգանուն</label>
+            <input value={bossName} onChange={e => setBossName(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Պաշտոն</label>
+            <input value={bossDescr} onChange={e => setBossDescr(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1">Լուսանկար</label>
+          {(bossSrc || bossFile) && <img src={bossFile ? URL.createObjectURL(bossFile) : (bossSrc.startsWith('/') ? `${SERVER}${bossSrc}` : bossSrc)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
+          <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) setBossFile(e.target.files[0]); }} className="text-xs" />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-4">
+        <h3 className="font-bold text-gray-800 border-b pb-2">Ամբիոնի պատկեր + Դասախոսների ցանկ</h3>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1">Card պատկեր</label>
+          {(imgUrl || imgFile) && <img src={imgFile ? URL.createObjectURL(imgFile) : (imgUrl.startsWith('/') ? `${SERVER}${imgUrl}` : imgUrl)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
+          <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) setImgFile(e.target.files[0]); }} className="text-xs" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1">Դասախոսների ցանկ (մեկ անուն = մեկ տող)</label>
+          <textarea rows={10} value={staff} onChange={e => setStaff(e.target.value)} placeholder="Անուն Ազգանուն&#10;Անուն Ազգանուն&#10;..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y font-mono" />
+        </div>
+      </div>
+
+      {error && <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-3">{error}</p>}
+      <div className="flex gap-3">
+        <button type="submit" disabled={loading} className="px-6 py-3 bg-[#004471] text-white rounded-lg font-semibold text-sm hover:bg-[#003560] disabled:opacity-60 transition-colors">
+          {loading ? 'Պահպանվում է...' : isEdit ? 'Թարմացնել' : 'Ստեղծել'}
+        </button>
+        <button type="button" onClick={() => router.back()} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition-colors">
+          Չեղարկել
+        </button>
+      </div>
+    </form>
+  );
+}

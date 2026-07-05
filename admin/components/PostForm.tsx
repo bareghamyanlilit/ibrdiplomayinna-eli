@@ -54,6 +54,21 @@ export default function PostForm({ type, initial }: PostFormProps) {
     e.preventDefault();
     if (!title.am || !content.am) { setError('Հայերեն վերնագիրն ու բովանդակությունը պարտադիր են'); return; }
     setLoading(true); setError('');
+const convertVideoUrl = (url: string) => {
+  if (!url) return "";
+
+  if (url.includes("youtube.com/watch?v=")) {
+    const id = new URL(url).searchParams.get("v");
+    return `https://www.youtube.com/embed/${id}`;
+  }
+
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1];
+    return `https://www.youtube.com/embed/${id}`;
+  }
+
+  return url;
+};
     try {
       const fd = new FormData();
       fd.append('titleAm', title.am);
@@ -62,12 +77,11 @@ export default function PostForm({ type, initial }: PostFormProps) {
       fd.append('contentAm', content.am);
       fd.append('contentRu', content.ru);
       fd.append('contentEn', content.en);
-      fd.append('video', video);
+      fd.append("video", convertVideoUrl(video));
       fd.append('isPublished', String(isPublished));
       if (type === 'announcements') fd.append('upToDate', upToDate);
       existingImages.forEach((img) => fd.append('existingImages', img));
       newFiles.forEach((f) => fd.append('images', f));
-
       if (isEdit) {
         await api.put(`/${type}/${initial!._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       } else {

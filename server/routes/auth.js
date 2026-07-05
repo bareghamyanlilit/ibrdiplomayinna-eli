@@ -8,7 +8,7 @@ const authMiddleware = require('../middleware/auth');
 const resetCodes = {};
 
 const signToken = (id) =>
-  jwt.sign({ id }, process.env.JWT_SECRET || 'secret', { expiresIn: '1d' });
+  jwt.sign({ id }, process.env.JWT_SECRET || 'secret', { expiresIn: '7d' });
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -54,24 +54,41 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const admin = await Admin.findOne({ email });
 
-    if (!admin) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!admin) {
+      return res.status(400).json({
+        message: 'Invalid credentials',
+      });
+    }
 
     const passwordOk = await admin.comparePassword(password);
 
     if (!passwordOk) {
-      const code = crypto.randomInt(100000, 999999).toString();
-      resetCodes[email] = { code, expiresAt: Date.now() + 10 * 60 * 1000 };
-      await sendCode(email, code);
-      return res.status(401).json({ message: 'wrong_password', email });
+      return res.status(400).json({
+        message: 'Invalid credentials',
+      });
     }
 
-    const token = signToken(admin._id);
-    res.json({ token, admin: { id: admin._id, name: admin.name, email: admin.email } });
+    const code = crypto.randomInt(100000, 999999).toString();
+
+    resetCodes[email] = {
+      code,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+
+    await sendCode(email, code);
+
+    return res.json({
+      requiresCode: true,
+      email,
+    });
   } catch (err) {
-    console.error('login error:', err);
-    res.status(500).json({ message: err.message });
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
+    });
   }
 });
 

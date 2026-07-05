@@ -10,7 +10,12 @@ const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/announcements', label: 'Հայտարարություններ', icon: Megaphone },
   { href: '/dashboard/news', label: 'Գրառումներ', icon: Newspaper },
+  { href: '/dashboard/departments', label: 'Մասնագիտություններ', icon: GraduationCap },
+  { href: '/dashboard/chairs', label: 'Ամբիոններ', icon: Building2 },
+  { href: '/dashboard/staff', label: 'Անձնակազմ', icon: Users },
+  { href: '/dashboard/admissions', label: 'Դիմորդ (Աղյուսակ)', icon: ClipboardList },
   { href: '/dashboard/library', label: 'Գրադարան', icon: Library },
+  { href: '/dashboard/studentCouncil', label: 'Ուսանողական խորհուրդ', icon: GraduationCap },
 ];
 
 export default function Sidebar() {

@@ -25,24 +25,36 @@ export default function LoginPage() {
   };
 
   // ─── Step 1: email + password ────────────────────────────────
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(''); setLoading(true);
-    try {
-      const { data } = await api.post('/auth/login', { email, password });
-      saveAndRedirect(data);
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string; email?: string } } };
-      const msg = axiosErr?.response?.data?.message;
-      if (msg === 'wrong_password') {
-        setError('Գաղտնաբառը սխալ է');
-      } else {
-        setError(msg || 'Սխալ տեղի ունեցավ');
-      }
-    } finally {
-      setLoading(false);
+ const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  setError('');
+  setLoading(true);
+
+  try {
+    const { data } = await api.post('/auth/login', {
+      email,
+      password,
+    });
+
+    if (data.requiresCode) {
+      setStep('code');
+      return;
     }
-  };
+  } catch (err: unknown) {
+    const msg = (
+      err as {
+        response?: {
+          data?: { message?: string };
+        };
+      }
+    )?.response?.data?.message;
+
+    setError(msg || 'Սխալ email կամ գաղտնաբառ');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ─── "Մոռացել եմ գաղտնաբառը" ────────────────────────────────
   const handleForgot = async () => {

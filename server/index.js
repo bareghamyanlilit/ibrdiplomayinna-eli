@@ -25,14 +25,16 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/announcements', require('./routes/announcements'));
 app.use('/api/news', require('./routes/news'));
+app.use('/api/departments', require('./routes/departments'));
+app.use('/api/staff', require('./routes/staff'));
+app.use('/api/chairs', require('./routes/chairs'));
 app.use('/api/library', require('./routes/library'));
+app.use('/api/admissions', require('./routes/admissions'));
+app.use('/api/studentCouncil', require('./routes/studentCouncil'));
 
 // MongoDB-in kapcum enq .env fayli MONGODB_URI-ov
-console.log('====================================');
-console.log(process.env.MONGODB_URI);
-console.log('====================================');
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/epq_college')
+  .connect(process.env.MONGODB_URI || 'mongodb+srv://ejmiacnipetcolej_db_user:KKSVsfFgbKsgrzBp@epc.qflm4kr.mongodb.net/?appName=epc_db')
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('❌ MongoDB error:', err));
 
