@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const items = await AdmissionRow.find(query).sort({ type: 1, order: 1 });
     res.json(items);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -27,7 +27,7 @@ router.get('/:id', async (req, res) => {
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -52,7 +52,7 @@ router.post('/', auth, async (req, res) => {
     });
     res.status(201).json(item);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -77,7 +77,7 @@ router.put('/:id', auth, async (req, res) => {
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -92,7 +92,7 @@ router.delete('/:id', auth, async (req, res) => {
     await AdmissionRow.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,

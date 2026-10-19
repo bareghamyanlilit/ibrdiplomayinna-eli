@@ -37,45 +37,45 @@ interface Dept {
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 const emptyLText = (): LText => ({ am: '', ru: '', en: '' });
 interface FieldProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    multiline?: boolean;
-    required?: boolean;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  multiline?: boolean;
+  required?: boolean;
 }
 
 function Field({
-    label,
-    value,
-    onChange,
-    multiline = false,
-    required = false,
+  label,
+  value,
+  onChange,
+  multiline = false,
+  required = false,
 }: FieldProps) {
-    return (
-        <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                {label}
-                {required && (
-                    <span className="text-red-500 ml-1">*</span>
-                )}
-            </label>
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-600 mb-1">
+        {label}
+        {required && (
+          <span className="text-red-500 ml-1">*</span>
+        )}
+      </label>
 
-            {multiline ? (
-                <textarea
-                    rows={4}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y"
-                />
-            ) : (
-                <input
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]"
-                />
-            )}
-        </div>
-    );
+      {multiline ? (
+        <textarea
+          rows={4}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]"
+        />
+      )}
+    </div>
+  );
 }
 export default function DepartmentForm({ initial }: { initial?: Dept }) {
   const router = useRouter();
@@ -144,7 +144,17 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
       setError(err?.response?.data?.message || 'Սխալ տեղի ունեցավ');
     } finally { setLoading(false); }
   };
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
 
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+
+    const server = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '');
+
+    return `${server}${url.startsWith('/') ? url : `/${url}`}`;
+  };
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
       {/* Basic Info */}
@@ -184,8 +194,14 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Պատկեր (icon/card)</label>
-            {childImgUrl && <img src={childImgUrl.startsWith('/') ? `${SERVER}${childImgUrl}` : childImgUrl} className="w-16 h-16 object-contain mb-2 border rounded" alt="" />}
-            <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) { setChildImgFile(e.target.files[0]); setChildImgUrl(URL.createObjectURL(e.target.files[0])); }}} className="w-full text-xs" />
+            {childImgUrl && (
+              <img
+                src={getImageUrl(childImgUrl)}
+                className="w-16 h-16 object-contain mb-2 border rounded"
+                alt=""
+              />
+            )}
+            <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) { setChildImgFile(e.target.files[0]); setChildImgUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-xs" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Տեսանյութ (mp4)</label>

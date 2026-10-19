@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     const items = await LibraryFile.find(query).sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -53,7 +53,7 @@ router.get('/specialties', async (req, res) => {
     specialties.sort((a, b) => (a.am || '').localeCompare(b.am || ''));
     res.json(specialties);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -68,7 +68,7 @@ router.get('/admin', auth, async (req, res) => {
     const items = await LibraryFile.find().sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -103,7 +103,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
     });
     res.status(201).json(item);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -144,7 +144,7 @@ router.put('/:id', auth, upload.single('file'), async (req, res) => {
     const item = await LibraryFile.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json(item);
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,
@@ -163,7 +163,7 @@ router.delete('/:id', auth, async (req, res) => {
     }
     res.json({ message: 'Deleted' });
   } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+    console.error('UPDATE  ERROR:', err);
 
     res.status(500).json({
         message: err.message,

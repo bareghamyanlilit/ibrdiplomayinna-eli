@@ -3,10 +3,8 @@
 // Photo upload multer-i majakum (FormData-ov)
 'use client';
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
-import Image from 'next/image';
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
