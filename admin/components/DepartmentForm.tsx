@@ -36,7 +36,47 @@ interface Dept {
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 const emptyLText = (): LText => ({ am: '', ru: '', en: '' });
+interface FieldProps {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    multiline?: boolean;
+    required?: boolean;
+}
 
+function Field({
+    label,
+    value,
+    onChange,
+    multiline = false,
+    required = false,
+}: FieldProps) {
+    return (
+        <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">
+                {label}
+                {required && (
+                    <span className="text-red-500 ml-1">*</span>
+                )}
+            </label>
+
+            {multiline ? (
+                <textarea
+                    rows={4}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y"
+                />
+            ) : (
+                <input
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]"
+                />
+            )}
+        </div>
+    );
+}
 export default function DepartmentForm({ initial }: { initial?: Dept }) {
   const router = useRouter();
   const isEdit = !!initial?._id;
@@ -104,16 +144,6 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
       setError(err?.response?.data?.message || 'Սխալ տեղի ունեցավ');
     } finally { setLoading(false); }
   };
-
-  const Field = ({ label, value, onChange, multiline = false, required = false }: any) => (
-    <div>
-      <label className="block text-xs font-semibold text-gray-600 mb-1">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
-      {multiline
-        ? <textarea rows={4} value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y" />
-        : <input value={value} onChange={e => onChange(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]" />
-      }
-    </div>
-  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
