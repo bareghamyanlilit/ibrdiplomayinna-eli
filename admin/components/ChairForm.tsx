@@ -10,7 +10,7 @@ import LangTabs from '@/components/LangTabs';
 type Lang = 'am' | 'ru' | 'en';
 type LText = { am: string; ru: string; en: string };
 const emptyL = (): LText => ({ am: '', ru: '', en: '' });
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
 export default function ChairForm({ initial }: { initial?: any }) {
   const router = useRouter();

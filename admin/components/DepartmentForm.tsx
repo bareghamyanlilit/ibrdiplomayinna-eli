@@ -34,7 +34,7 @@ interface Dept {
   isPublished?: boolean;
 }
 
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 const emptyLText = (): LText => ({ am: '', ru: '', en: '' });
 
 export default function DepartmentForm({ initial }: { initial?: Dept }) {

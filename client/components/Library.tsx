@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LangContext";
 import { P } from "./descr";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 console.log('====================================');
 console.log(API);
 console.log('====================================');

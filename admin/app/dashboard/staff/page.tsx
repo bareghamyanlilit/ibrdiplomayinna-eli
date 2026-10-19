@@ -6,8 +6,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import Image from 'next/image';
 
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
 const CAT_LABELS: Record<string, string> = {
   boss: 'Ղեկավար անձնակազմ',
@@ -88,7 +89,7 @@ export default function StaffAdminPage() {
                 <div className="divide-y divide-gray-100">
                   {members.map(m => (
                     <div key={m._id} className="flex items-center gap-3 px-5 py-3">
-                      {m.src ? <img src={m.src.startsWith('/') ? `${SERVER}${m.src}` : m.src} className="w-10 h-10 rounded-full object-cover flex-shrink-0 border" alt="" /> : <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-400 text-lg font-bold">{m.name[0]}</div>}
+                      {m.src ? <Image src={m.src.startsWith('/') ? `${SERVER}${m.src}` : m.src} className="w-10 h-10 rounded-full object-cover flex-shrink-0 border" alt="" /> : <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-400 text-lg font-bold">{m.name[0]}</div>}
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 text-sm">{m.name}</p>
                         <p className="text-xs text-gray-400">{m.descr}</p>

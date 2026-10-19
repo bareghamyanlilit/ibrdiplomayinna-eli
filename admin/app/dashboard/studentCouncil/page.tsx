@@ -5,9 +5,10 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '@/lib/api';
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import Image from 'next/image';
 
 const SERVER =
-  process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_SERVER_URL;
 
 const POSITIONS = [
   "Ուսանողական խորհրդի նախագահ",
@@ -174,7 +175,7 @@ export default function StudentCouncilAdminPage() {
                 className="flex items-center gap-3 px-5 py-3"
               >
                 {m.src ? (
-                  <img
+                  <Image
                     src={
                       m.src.startsWith("/")
                         ? `${SERVER}${m.src}`
@@ -308,7 +309,7 @@ export default function StudentCouncilAdminPage() {
           </label>
 
           {(editItem.src || photoFile) && (
-            <img
+            <Image
               src={
                 photoFile
                   ? URL.createObjectURL(photoFile)

@@ -32,7 +32,7 @@ interface PostFormProps {
 }
 
 const LANG_LABELS: Record<Lang, string> = { am: 'Հայերեն', ru: 'Русский', en: 'English' };
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 export default function PostForm({ type, initial }: PostFormProps) {
   const router = useRouter();

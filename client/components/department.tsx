@@ -8,8 +8,8 @@ import Image from "next/image";
 import { useLanguage } from "@/context/LangContext";
 import { useState, useEffect } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
 interface DeptData {
   _id: string;

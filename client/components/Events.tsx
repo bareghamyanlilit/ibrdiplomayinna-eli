@@ -7,8 +7,8 @@ import { useLanguage } from "@/context/LangContext";
 import { P } from "./descr";
 import { H2 } from "./title";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 interface Item {
   _id: string;

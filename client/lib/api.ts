@@ -1,7 +1,7 @@
 // API-i base URL-y .env-ic (lranaguyts` localhost:5000/api)
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 // Server URL-y nkarnery ev failery download anel hamar
-export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+export const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 // Bolor hryatarakac haytararutyunnery stanel (60 varkyan revalidation-ov)
 export async function fetchAnnouncements() {

@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from 'react';
 import api from '@/lib/api';
 import { Plus, Pencil, Trash2, X, Download, FileText, Search } from 'lucide-react';
 
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:5000';
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
 type Lang = 'am' | 'ru' | 'en';
 const LANG_LABELS: Record<Lang, string> = { am: 'Հայերեն', ru: 'Русский', en: 'English' };

@@ -11,8 +11,8 @@ const app = express();
 // CORS-i karcavor parametnery (frontend-i ev admin-i URL-ery trvum en)
 app.use(cors({
   origin: [
-    process.env.FRONTEND_URL || 'http://localhost:3000',
-    process.env.ADMIN_URL || 'http://localhost:3001',
+    process.env.FRONTEND_URL || 'https://ibrdiplomayinna-eli.vercel.app',
+    process.env.ADMIN_URL || 'https://ibrdiplomayinna-eli.vercel.app/admin',
   ],
   credentials: true,
 }));

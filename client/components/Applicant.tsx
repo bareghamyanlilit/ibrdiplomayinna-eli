@@ -7,7 +7,7 @@ import { useLanguage } from "@/context/LangContext";
 import { H2 } from "./title";
 import { P } from "./descr";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 type Lang = "am" | "ru" | "en";
 type LText = { am: string; ru: string; en: string };

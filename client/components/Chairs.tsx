@@ -7,8 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { H2 } from "./title";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-const SERVER = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_API_URL || "/api";
+const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
 
 interface ChairItem { _id: string; title: { am: string; ru: string; en: string }; img: string; }
 
