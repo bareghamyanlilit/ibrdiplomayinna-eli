@@ -34,7 +34,7 @@ app.use('/api/studentCouncil', require('./routes/studentCouncil'));
 
 // MongoDB-in kapcum enq .env fayli MONGODB_URI-ov
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb+srv://ejmiacnipetcolej_db_user:KKSVsfFgbKsgrzBp@epc.qflm4kr.mongodb.net/?appName=epc_db')
+  .connect(process.env.MONGODB_URI )
   .then(() => console.log('✅ MongoDB connected'))
   .catch((err) => console.error('❌ MongoDB error:', err));
 
