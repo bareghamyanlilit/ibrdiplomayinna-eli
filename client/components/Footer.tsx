@@ -45,7 +45,7 @@ export function Footer() {
             className=" font-bold text-white"
           />
           <ul className="flex justify-center md:justify-start gap-3">
-            {data.footer.socials.socImg.map((item, idx) => (
+            {data.footer.socials.socImg.map((item:any, idx:any) => (
               <li key={idx}>
                 <Link href={item.href}>
                   <Image

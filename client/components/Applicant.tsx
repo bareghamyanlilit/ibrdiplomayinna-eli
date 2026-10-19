@@ -44,13 +44,13 @@ export function Applicant() {
             <table className="w-full border-0 text-left text-sm sm:text-base">
               <thead>
                 <tr className="bg-[#003865] text-white text-sm sm:text-xl">
-                  {data.aboutInfo.admissionsData.table[0].map((elem, i) => <th key={i} className="px-3 py-2 sm:px-6 sm:py-5 font-bold">{elem}</th>)}
+                  {data.aboutInfo.admissionsData.table[0].map((elem:any, i:any) => <th key={i} className="px-3 py-2 sm:px-6 sm:py-5 font-bold">{elem}</th>)}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {data.aboutInfo.admissionsData.table.slice(1).map((e, i) => (
+                {data.aboutInfo.admissionsData.table.slice(1).map((e:any, i:any) => (
                   <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    {e.map((elem, j) => <td key={j} className="px-3 py-2 sm:px-6 sm:py-5">{elem}</td>)}
+                    {e.map((elem:any, j:any) => <td key={j} className="px-3 py-2 sm:px-6 sm:py-5">{elem}</td>)}
                   </tr>
                 ))}
               </tbody>
@@ -64,13 +64,13 @@ export function Applicant() {
             <table className="w-full border-0 text-left text-sm sm:text-base">
               <thead>
                 <tr className="bg-[#003865] text-white text-sm sm:text-xl">
-                  {data.aboutInfo.remotelyAdmissionsData.table[0].map((elem, i) => <th key={i} className="px-3 py-2 sm:px-6 sm:py-5 font-bold">{elem}</th>)}
+                  {data.aboutInfo.remotelyAdmissionsData.table[0].map((elem:any, i:any) => <th key={i} className="px-3 py-2 sm:px-6 sm:py-5 font-bold">{elem}</th>)}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {data.aboutInfo.remotelyAdmissionsData.table.slice(1).map((e, i) => (
+                {data.aboutInfo.remotelyAdmissionsData.table.slice(1).map((e:any, i:any) => (
                   <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                    {e.map((elem, j) => <td key={j} className="px-3 py-2 sm:px-6 sm:py-5">{elem}</td>)}
+                    {e.map((elem:any, j:any) => <td key={j} className="px-3 py-2 sm:px-6 sm:py-5">{elem}</td>)}
                   </tr>
                 ))}
               </tbody>

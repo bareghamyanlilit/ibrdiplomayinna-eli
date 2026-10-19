@@ -46,7 +46,11 @@ export default function LibraryAdminPage() {
   useEffect(() => { load(); }, []);
 
   const getSpecKey = (s: any) => typeof s === 'string' ? s : (s?.am || '');
-  const specialties = [...new Map(items.map(i => [getSpecKey(i.specialty), i.specialty])).values()];
+  const specialties = Array.from(
+    new Map(
+        items.map(i => [getSpecKey(i.specialty), i.specialty])
+    ).values()
+);
   const filtered = items.filter(i => {
     const displayName = typeof i.name === 'string' ? i.name : (i.name?.am || '');
     const ms = !search || displayName.toLowerCase().includes(search.toLowerCase()) || i.fileName?.toLowerCase().includes(search.toLowerCase());

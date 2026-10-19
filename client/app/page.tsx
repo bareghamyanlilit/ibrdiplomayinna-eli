@@ -41,7 +41,7 @@ export default function HomePage() {
         ></H2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 place-self-center justify-items-center">
-          {data.homeInfo.stats.map((item, i) => (
+          {data.homeInfo.stats.map((item:any, i:any) => (
             <div
               key={i}
               className="bg-[#0a3760] text-white w-64 h-40 flex flex-col items-center justify-center relative"

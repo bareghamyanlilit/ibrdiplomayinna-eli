@@ -15,7 +15,7 @@ export function Cooperation() {
         <H2 txt={data.aboutInfo.partnersPartTitle} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {data.aboutInfo.partners.map((e, i) => (
+          {data.aboutInfo.partners.map((e:any, i:any) => (
             <div
               key={i}
               className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center"
