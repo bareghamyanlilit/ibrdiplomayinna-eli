@@ -3,7 +3,7 @@
 
 import { useLanguage } from "@/context/LangContext";
 import Image from "next/image";
-import img from "@/img/library/book.png";
+import img from "@/public/img/library/book.png";
 
 export function LibraryName({ id }: { id: number }) {
     const { data } = useLanguage();
