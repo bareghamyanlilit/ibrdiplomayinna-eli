@@ -48,14 +48,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST / — nory anjnakazci avclacnel (autentificacum + mek nkari upload)
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+// src-y gali e nkaric kkam req.body.src-ic (ethe upload chi eghel)
 router.post('/', auth, upload.single('photo'), async (req, res) => {
   try {
     const { name, descr, category, order } = req.body;
@@ -72,22 +65,8 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 }
 });
 
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+// PUT /:id — arsknacnem anjnakazci-in id-ov
+// Ethe nor nkar chi upload-vac, pahenq egacy
 router.put('/:id', auth, upload.single('photo'), async (req, res) => {
   try {
     const { name, descr, category, order } = req.body;
