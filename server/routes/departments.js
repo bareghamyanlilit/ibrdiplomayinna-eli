@@ -29,23 +29,9 @@ router.get('/', async (req, res) => {
         name: err.name,
     });
 }
-})} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+});
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}cum petk e)
+// GET /admin — BOLOR masnagitvutyunnery admin-i hamar (autentificacum petk e)
 router.get('/admin', auth, async (req, res) => {
   try {
     const items = await Department.find().sort({ order: 1, createdAt: 1 });
@@ -83,14 +69,7 @@ router.post('/', auth, upload.fields([
   { name: 'childImg', maxCount: 1 },
   { name: 'video', maxCount: 1 },
   { name: 'images', maxCount: 20 },
-])} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+]), async (req, res) => {
   try {
     const b = req.body;
     const files = req.files || {};
@@ -104,14 +83,7 @@ router.post('/', auth, upload.fields([
       shortTitle: { am: b.shortTitleAm || '', ru: b.shortTitleRu || '', en: b.shortTitleEn || '' },
       video: files.video ? `/uploads/${files.video[0].filename}` : (b.videoUrl || ''),
       childImg: files.childImg ? `/uploads/${files.childImg[0].filename}` : (b.childImgUrl || ''),
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+      infoParts,
       images: files.images ? files.images.map(f => `/uploads/${f.filename}`) : [],
       partImgTitle: { am: b.partImgTitleAm || '', ru: b.partImgTitleRu || '', en: b.partImgTitleEn || '' },
       order: Number(b.order) || 0,
@@ -126,13 +98,6 @@ router.post('/', auth, upload.fields([
         name: err.name,
     });
 }
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
 });
 
 // PUT /:id — arsknacnem masnagitvutyuny id-ov
@@ -140,22 +105,8 @@ router.post('/', auth, upload.fields([
 router.put('/:id', auth, upload.fields([
   { name: 'childImg', maxCount: 1 },
   { name: 'video', maxCount: 1 },
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-])} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+  { name: 'images', maxCount: 20 },
+]), async (req, res) => {
   try {
     const b = req.body;
     const files = req.files || {};
@@ -168,36 +119,8 @@ router.put('/:id', auth, upload.fields([
 
     const update = {
       color: b.color || existing.color,
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-} '', en: b.titleEn || '' },
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-}r} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+      title: { am: b.titleAm || existing.title.am, ru: b.titleRu || '', en: b.titleEn || '' },
+      descr: { am: b.descrAm || '', ru: b.descrRu || '', en: b.descrEn || '' },
       shortTitle: { am: b.shortTitleAm || '', ru: b.shortTitleRu || '', en: b.shortTitleEn || '' },
       video: files.video ? `/uploads/${files.video[0].filename}` : (b.videoUrl || existing.video || ''),
       childImg: files.childImg ? `/uploads/${files.childImg[0].filename}` : (b.childImgUrl || existing.childImg || ''),
@@ -218,14 +141,7 @@ router.put('/:id', auth, upload.fields([
         name: err.name,
     });
 }
-})} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+});
 
 // DELETE /:id — jnjel masnagitvutyuny
 router.delete('/:id', auth, async (req, res) => {

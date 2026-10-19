@@ -44,14 +44,7 @@ router.post('/', auth, async (req, res) => {
     const item = await AdmissionRow.create({
       specialty: { am: b.specialtyAm, ru: b.specialtyRu || '', en: b.specialtyEn || '' },
       educationBase: { am: b.educationBaseAm || '', ru: b.educationBaseRu || '', en: b.educationBaseEn || '' },
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}tionRu || '', en: b.qualificationEn || '' },
+      qualification: { am: b.qualificationAm || '', ru: b.qualificationRu || '', en: b.qualificationEn || '' },
       subjects: { am: b.subjectsAm || '', ru: b.subjectsRu || '', en: b.subjectsEn || '' },
       duration: { am: b.durationAm || '', ru: b.durationRu || '', en: b.durationEn || '' },
       type: b.type || 'full',
@@ -66,53 +59,11 @@ router.post('/', auth, async (req, res) => {
         name: err.name,
     });
 }
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
 });
 
 // PUT /:id — arsknacnem toly id-ov (autentificacum petk e)
-ro} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-}
+router.put('/:id', auth, async (req, res) => {
+  try {
     const b = req.body;
     const item = await AdmissionRow.findByIdAndUpdate(req.params.id, {
       specialty: { am: b.specialtyAm, ru: b.specialtyRu || '', en: b.specialtyEn || '' },

@@ -37,30 +37,9 @@ router.get('/', async (req, res) => {
         name: err.name,
     });
 }
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
 });
-} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}pdown hamar)
+// GET /specialties — masnagitvutyunneri unique ternery stanel (dropdown hamar)
 router.get('/specialties', async (req, res) => {
   try {
     // Return unique specialty objects (deduplicated by am value)
@@ -122,14 +101,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       mimeType: req.file.mimetype,
       order: Number(order) || 0,
     });
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+    res.status(201).json(item);
   } catch (err) {
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
@@ -141,14 +113,7 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
 });
 
 // PUT /:id — arsknacnem meta-tvyalnery (name, specialty, order, isPublished)
-//} catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+// Nerc fail upload anel, kkam tolk meta poxel
 router.put('/:id', auth, upload.single('file'), async (req, res) => {
   try {
     const { nameAm, nameRu, nameEn, specialtyAm, specialtyRu, specialtyEn, order, isPublished } = req.body;
@@ -171,26 +136,12 @@ router.put('/:id', auth, upload.single('file'), async (req, res) => {
     };
     // Ethe nor fail e upload-vac, arsknacnenq fayli informatsiay
     if (req.file) {
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+      update.fileName = req.file.originalname;
       update.filePath = `/uploads/library/${req.file.filename}`;
       update.fileSize = req.file.size;
       update.mimeType = req.file.mimetype;
     }
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-} update, { new: true });
+    const item = await LibraryFile.findByIdAndUpdate(req.params.id, update, { new: true });
     res.json(item);
   } catch (err) {
     console.error('UPDATE DEPARTMENT ERROR:', err);

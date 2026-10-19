@@ -62,7 +62,14 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
     const src = req.file ? `/uploads/${req.file.filename}` : (req.body.src || '');
     const item = await StaffMember.create({ name, descr, src, category, order: Number(order) || 0 });
     res.status(201).json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 //} catch (err) {
@@ -93,7 +100,14 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
       { new: true }
     );
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // DELETE /:id — jnjel anjnakazci-in
@@ -101,7 +115,14 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     await StaffMember.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 module.exports = router;
