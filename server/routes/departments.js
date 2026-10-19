@@ -102,47 +102,109 @@ router.post('/', auth, upload.fields([
 
 // PUT /:id — arsknacnem masnagitvutyuny id-ov
 // Pahum enq egac nkarnery (existingImages) ev avclacnum enq norery
-router.put('/:id', auth, upload.fields([
-  { name: 'childImg', maxCount: 1 },
-  { name: 'video', maxCount: 1 },
-  { name: 'images', maxCount: 20 },
-]), async (req, res) => {
-  try {
-    const b = req.body;
-    const files = req.files || {};
-    const existing = await Department.findById(req.params.id);
-    if (!existing) return res.status(404).json({ message: 'Not found' });
+router.put(
+  '/:id',
+  auth,
+  (req, res, next) => {
+    console.log('STEP 1: AUTH PASSED');
+    next();
+  },
+  upload.fields([
+    { name: 'childImg', maxCount: 1 },
+    { name: 'video', maxCount: 1 },
+    { name: 'images', maxCount: 20 },
+  ]),
+  async (req, res) => {
+    try {
+      console.log('STEP 2: MULTER PASSED');
+      console.log('Department ID:', req.params.id);
+      console.log('Body fields:', Object.keys(req.body || {}));
 
-    const infoParts = JSON.parse(b.infoParts || JSON.stringify(existing.infoParts));
-    const keptImages = b.existingImages ? (Array.isArray(b.existingImages) ? b.existingImages : [b.existingImages]) : [];
-    const newImages = files.images ? files.images.map(f => `/uploads/${f.filename}`) : [];
+      const b = req.body || {};
+      const files = req.files || {};
 
-    const update = {
-      color: b.color || existing.color,
-      title: { am: b.titleAm || existing.title.am, ru: b.titleRu || '', en: b.titleEn || '' },
-      descr: { am: b.descrAm || '', ru: b.descrRu || '', en: b.descrEn || '' },
-      shortTitle: { am: b.shortTitleAm || '', ru: b.shortTitleRu || '', en: b.shortTitleEn || '' },
-      video: files.video ? `/uploads/${files.video[0].filename}` : (b.videoUrl || existing.video || ''),
-      childImg: files.childImg ? `/uploads/${files.childImg[0].filename}` : (b.childImgUrl || existing.childImg || ''),
-      infoParts,
-      images: [...keptImages, ...newImages],
-      partImgTitle: { am: b.partImgTitleAm || '', ru: b.partImgTitleRu || '', en: b.partImgTitleEn || '' },
-      order: Number(b.order) || 0,
-      isPublished: b.isPublished !== 'false',
-    };
+      const existing = await Department.findById(req.params.id);
 
-    const dept = await Department.findByIdAndUpdate(req.params.id, update, { new: true });
-    res.json(dept);
-  } catch (err) {
-    console.error('UPDATE DEPARTMENT ERROR:', err);
+      if (!existing) {
+        return res.status(404).json({ message: 'Department not found' });
+      }
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
-});
+      console.log('STEP 3: DEPARTMENT FOUND');
 
+      let infoParts;
+
+      try {
+        infoParts = b.infoParts
+          ? JSON.parse(b.infoParts)
+          : existing.infoParts;
+      } catch (error) {
+        return res.status(400).json({
+          message: 'Invalid infoParts JSON',
+          details: error.message,
+        });
+      }
+
+      const keptImages = b.existingImages
+        ? Array.isArray(b.existingImages)
+          ? b.existingImages
+          : [b.existingImages]
+        : [];
+
+      const newImages = files.images
+        ? files.images.map((file) => `/uploads/${file.filename}`)
+        : [];
+
+      const update = {
+        color: b.color || existing.color,
+        title: {
+          am: b.titleAm || existing.title?.am || '',
+          ru: b.titleRu || '',
+          en: b.titleEn || '',
+        },
+        descr: {
+          am: b.descrAm || '',
+          ru: b.descrRu || '',
+          en: b.descrEn || '',
+        },
+        shortTitle: {
+          am: b.shortTitleAm || '',
+          ru: b.shortTitleRu || '',
+          en: b.shortTitleEn || '',
+        },
+        video: b.videoUrl || existing.video || '',
+        childImg: b.childImgUrl || existing.childImg || '',
+        infoParts,
+        images: [...keptImages, ...newImages],
+        partImgTitle: {
+          am: b.partImgTitleAm || '',
+          ru: b.partImgTitleRu || '',
+          en: b.partImgTitleEn || '',
+        },
+        order: Number(b.order) || 0,
+        isPublished: b.isPublished !== 'false',
+      };
+
+      console.log('STEP 4: UPDATE OBJECT BUILT');
+
+      const dept = await Department.findByIdAndUpdate(
+        req.params.id,
+        update,
+        { new: true, runValidators: true }
+      );
+
+      console.log('STEP 5: UPDATE SUCCESS');
+
+      return res.json(dept);
+    } catch (err) {
+      console.error('UPDATE DEPARTMENT ERROR:', err);
+
+      return res.status(500).json({
+        message: err.message || 'Unknown server error',
+        name: err.name || 'Error',
+      });
+    }
+  }
+);
 // DELETE /:id — jnjel masnagitvutyuny
 router.delete('/:id', auth, async (req, res) => {
   try {
