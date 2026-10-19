@@ -35,47 +35,69 @@ interface Dept {
 }
 
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
+const getImageUrl = (url: string) => {
+  if (!url) return '';
+
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  const server = SERVER?.replace(/\/+$/, '');
+
+  if (!server) {
+    console.error('NEXT_PUBLIC_SERVER_URL is not configured');
+    return url;
+  }
+
+  let path = url.replace(/^\/+/, '');
+
+  // Հեռացնում ենք սխալ staff/ նախածանցը
+  path = path.replace(/^staff\//, '');
+
+  return `${server}/${path}`;
+};
+
 const emptyLText = (): LText => ({ am: '', ru: '', en: '' });
 interface FieldProps {
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    multiline?: boolean;
-    required?: boolean;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  multiline?: boolean;
+  required?: boolean;
 }
 
 function Field({
-    label,
-    value,
-    onChange,
-    multiline = false,
-    required = false,
+  label,
+  value,
+  onChange,
+  multiline = false,
+  required = false,
 }: FieldProps) {
-    return (
-        <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">
-                {label}
-                {required && (
-                    <span className="text-red-500 ml-1">*</span>
-                )}
-            </label>
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-600 mb-1">
+        {label}
+        {required && (
+          <span className="text-red-500 ml-1">*</span>
+        )}
+      </label>
 
-            {multiline ? (
-                <textarea
-                    rows={4}
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y"
-                />
-            ) : (
-                <input
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]"
-                />
-            )}
-        </div>
-    );
+      {multiline ? (
+        <textarea
+          rows={4}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] resize-y"
+        />
+      ) : (
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471]"
+        />
+      )}
+    </div>
+  );
 }
 export default function DepartmentForm({ initial }: { initial?: Dept }) {
   const router = useRouter();
@@ -137,8 +159,11 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
       existingImages.forEach(img => fd.append('existingImages', img));
       newImageFiles.forEach(f => fd.append('images', f));
 
-      if (isEdit) await api.put(`/departments/${initial!._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/departments', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (isEdit) {
+        await api.put(`/departments/${initial!._id}`, fd);
+      } else {
+        await api.post('/departments', fd);
+      }
       router.push('/dashboard/departments');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Սխալ տեղի ունեցավ');
@@ -184,8 +209,14 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Պատկեր (icon/card)</label>
-            {childImgUrl && <img src={childImgUrl.startsWith('/') ? `${SERVER}${childImgUrl}` : childImgUrl} className="w-16 h-16 object-contain mb-2 border rounded" alt="" />}
-            <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) { setChildImgFile(e.target.files[0]); setChildImgUrl(URL.createObjectURL(e.target.files[0])); }}} className="w-full text-xs" />
+            {childImgUrl && (
+              <img
+                src={childImgFile ? childImgUrl : getImageUrl(childImgUrl)}
+                className="w-16 h-16 object-contain mb-2 border rounded"
+                alt=""
+              />
+            )}
+            <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) { setChildImgFile(e.target.files[0]); setChildImgUrl(URL.createObjectURL(e.target.files[0])); } }} className="w-full text-xs" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Տեսանյութ (mp4)</label>
@@ -246,7 +277,11 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
           <div className="flex flex-wrap gap-2">
             {existingImages.map((img, i) => (
               <div key={i} className="relative group">
-                <img src={img.startsWith('/') ? `${SERVER}${img}` : img} className="w-20 h-20 object-cover rounded-lg border" alt="" />
+                <img
+                  src={getImageUrl(img)}
+                  className="w-20 h-20 object-cover rounded-lg border"
+                  alt=""
+                />
                 <button type="button" onClick={() => setExistingImages(p => p.filter((_, idx) => idx !== i))}
                   className="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <X size={10} />

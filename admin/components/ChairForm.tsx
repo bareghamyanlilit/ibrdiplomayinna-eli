@@ -11,7 +11,26 @@ type Lang = 'am' | 'ru' | 'en';
 type LText = { am: string; ru: string; en: string };
 const emptyL = (): LText => ({ am: '', ru: '', en: '' });
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
+const getImageUrl = (url: string) => {
+  if (!url) return '';
 
+  // Ամբողջական URL-ն օգտագործում ենք անփոփոխ
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  const server = SERVER?.replace(/\/+$/, '');
+
+  if (!server) {
+    console.error('NEXT_PUBLIC_SERVER_URL is not configured');
+    return url;
+  }
+
+  // Հեռացնում ենք ավելորդ staff/ նախածանցը
+  const path = url.replace(/^\/+/, '').replace(/^staff\//, '');
+
+  return `${server}/${path}`;
+};
 export default function ChairForm({ initial }: { initial?: any }) {
   const router = useRouter();
   const isEdit = !!initial?._id;
@@ -86,7 +105,7 @@ export default function ChairForm({ initial }: { initial?: any }) {
         </div>
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1">Լուսանկար</label>
-          {(bossSrc || bossFile) && <img src={bossFile ? URL.createObjectURL(bossFile) : (bossSrc.startsWith('/') ? `${SERVER}${bossSrc}` : bossSrc)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
+          {(bossSrc || bossFile) && <img src={bossFile ? URL.createObjectURL(bossFile) : getImageUrl(bossSrc)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
           <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) setBossFile(e.target.files[0]); }} className="text-xs" />
         </div>
       </div>
@@ -95,7 +114,7 @@ export default function ChairForm({ initial }: { initial?: any }) {
         <h3 className="font-bold text-gray-800 border-b pb-2">Ամբիոնի պատկեր + Դասախոսների ցանկ</h3>
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1">Card պատկեր</label>
-          {(imgUrl || imgFile) && <img src={imgFile ? URL.createObjectURL(imgFile) : (imgUrl.startsWith('/') ? `${SERVER}${imgUrl}` : imgUrl)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
+          {(imgUrl || imgFile) && <img src={imgFile ? URL.createObjectURL(imgFile) : getImageUrl(imgUrl)} className="w-20 h-20 object-cover rounded-lg mb-2 border" alt="" />}
           <input type="file" accept="image/*" onChange={e => { if (e.target.files?.[0]) setImgFile(e.target.files[0]); }} className="text-xs" />
         </div>
         <div>
