@@ -21,16 +21,44 @@ router.get('/', async (req, res) => {
   try {
     const items = await Chair.find().sort({ order: 1 });
     res.json(items);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
 
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+});
+} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 // GET /:id — mi ambion stanel id-ov
 router.get('/:id', async (req, res) => {
   try {
     const item = await Chair.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // POST / — nory ambion stexcel (autentificacum + nkar ev nakhagahi lusankar upload)
@@ -39,7 +67,21 @@ router.post('/', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'bos
   try {
     const b = req.body;
     const files = req.files || {};
-    const staffList = b.staff ? (Array.isArray(b.staff) ? b.staff : b.staff.split('\n').filter(Boolean)) : [];
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+} } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
     const item = await Chair.create({
       title: { am: b.titleAm, ru: b.titleRu || '', en: b.titleEn || '' },
       descr: { am: b.descrAm || '', ru: b.descrRu || '', en: b.descrEn || '' },
@@ -53,12 +95,47 @@ router.post('/', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'bos
       order: Number(b.order) || 0,
     });
     res.status(201).json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // PUT /:id — arsknacnem ambion-y id-ov
-// Ethe nkary chi poxvac, pahum enq egacy
-router.put('/:id', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'bossPhoto', maxCount: 1 }]), async (req, res) => {
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+ro} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+}}} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
   try {
     const b = req.body;
     const files = req.files || {};
@@ -71,22 +148,50 @@ router.put('/:id', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'b
       img: files.img ? `/uploads/${files.img[0].filename}` : (b.imgUrl || existing.img || ''),
       boss: {
         name: b.bossName || '',
-        descr: b.bossDescr || '',
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
         src: files.bossPhoto ? `/uploads/${files.bossPhoto[0].filename}` : (b.bossSrc || existing.boss?.src || ''),
       },
       staff: staffList,
       order: Number(b.order) || 0,
     }, { new: true });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+})} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 
 // DELETE /:id — jnjel ambion-y
 router.delete('/:id', auth, async (req, res) => {
   try {
     await Chair.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 module.exports = router;

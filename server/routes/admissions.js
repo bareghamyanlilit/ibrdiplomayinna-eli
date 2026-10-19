@@ -10,7 +10,14 @@ router.get('/', async (req, res) => {
     const query = type ? { type } : {};
     const items = await AdmissionRow.find(query).sort({ type: 1, order: 1 });
     res.json(items);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // GET /:id — mi tol stanel id-ov
@@ -19,7 +26,14 @@ router.get('/:id', async (req, res) => {
     const item = await AdmissionRow.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // POST / — nory tol avclacnel aghjusaki mej (autentificacum petk e)
@@ -30,19 +44,75 @@ router.post('/', auth, async (req, res) => {
     const item = await AdmissionRow.create({
       specialty: { am: b.specialtyAm, ru: b.specialtyRu || '', en: b.specialtyEn || '' },
       educationBase: { am: b.educationBaseAm || '', ru: b.educationBaseRu || '', en: b.educationBaseEn || '' },
-      qualification: { am: b.qualificationAm || '', ru: b.qualificationRu || '', en: b.qualificationEn || '' },
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}tionRu || '', en: b.qualificationEn || '' },
       subjects: { am: b.subjectsAm || '', ru: b.subjectsRu || '', en: b.subjectsEn || '' },
       duration: { am: b.durationAm || '', ru: b.durationRu || '', en: b.durationEn || '' },
       type: b.type || 'full',
       order: Number(b.order) || 0,
     });
     res.status(201).json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // PUT /:id — arsknacnem toly id-ov (autentificacum petk e)
-router.put('/:id', auth, async (req, res) => {
-  try {
+ro} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+}
     const b = req.body;
     const item = await AdmissionRow.findByIdAndUpdate(req.params.id, {
       specialty: { am: b.specialtyAm, ru: b.specialtyRu || '', en: b.specialtyEn || '' },
@@ -55,7 +125,14 @@ router.put('/:id', auth, async (req, res) => {
     }, { new: true });
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // DELETE /:id — jnjel toly
@@ -63,7 +140,14 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     await AdmissionRow.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 module.exports = router;

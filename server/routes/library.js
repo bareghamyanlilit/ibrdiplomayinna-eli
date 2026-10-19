@@ -29,10 +29,38 @@ router.get('/', async (req, res) => {
     if (search) query['name.am'] = { $regex: search, $options: 'i' };
     const items = await LibraryFile.find(query).sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
-  } catch (err) { res.status(500).json({ message: err.message }); }
-});
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
 
-// GET /specialties — masnagitvutyunneri unique ternery stanel (dropdown hamar)
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+});
+} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}pdown hamar)
 router.get('/specialties', async (req, res) => {
   try {
     // Return unique specialty objects (deduplicated by am value)
@@ -45,7 +73,14 @@ router.get('/specialties', async (req, res) => {
     }
     specialties.sort((a, b) => (a.am || '').localeCompare(b.am || ''));
     res.json(specialties);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // GET /admin — bolor failery admin-i hamar (autentificacum petk e)
@@ -53,7 +88,14 @@ router.get('/admin', auth, async (req, res) => {
   try {
     const items = await LibraryFile.find().sort({ 'specialty.am': 1, order: 1 });
     res.json(items);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // POST / — nory fail upload anel (autentificacum petk e)
@@ -80,12 +122,33 @@ router.post('/', auth, upload.single('file'), async (req, res) => {
       mimeType: req.file.mimetype,
       order: Number(order) || 0,
     });
-    res.status(201).json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // PUT /:id — arsknacnem meta-tvyalnery (name, specialty, order, isPublished)
-// Nerc fail upload anel, kkam tolk meta poxel
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 router.put('/:id', auth, upload.single('file'), async (req, res) => {
   try {
     const { nameAm, nameRu, nameEn, specialtyAm, specialtyRu, specialtyEn, order, isPublished } = req.body;
@@ -108,14 +171,35 @@ router.put('/:id', auth, upload.single('file'), async (req, res) => {
     };
     // Ethe nor fail e upload-vac, arsknacnenq fayli informatsiay
     if (req.file) {
-      update.fileName = req.file.originalname;
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
       update.filePath = `/uploads/library/${req.file.filename}`;
       update.fileSize = req.file.size;
       update.mimeType = req.file.mimetype;
     }
-    const item = await LibraryFile.findByIdAndUpdate(req.params.id, update, { new: true });
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+} update, { new: true });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // DELETE /:id — jnjel DB-ic ev naev fizikakan fayl-y diskov vra
@@ -127,7 +211,14 @@ router.delete('/:id', auth, async (req, res) => {
       if (fs.existsSync(fullPath)) fs.unlinkSync(fullPath);
     }
     res.json({ message: 'Deleted' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 module.exports = router;

@@ -21,7 +21,14 @@ router.get('/', async (req, res) => {
   try {
     const items = await StaffMember.find().sort({ category: 1, order: 1 });
     res.json(items);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // GET /:id — mi anjnakazci stanel id-ov
@@ -30,11 +37,25 @@ router.get('/:id', async (req, res) => {
     const item = await StaffMember.findById(req.params.id);
     if (!item) return res.status(404).json({ message: 'Not found' });
     res.json(item);
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 });
 
 // POST / — nory anjnakazci avclacnel (autentificacum + mek nkari upload)
-// src-y gali e nkaric kkam req.body.src-ic (ethe upload chi eghel)
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 router.post('/', auth, upload.single('photo'), async (req, res) => {
   try {
     const { name, descr, category, order } = req.body;
@@ -44,8 +65,22 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// PUT /:id — arsknacnem anjnakazci-in id-ov
-// Ethe nor nkar chi upload-vac, pahenq egacy
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
+//} catch (err) {
+    console.error('UPDATE DEPARTMENT ERROR:', err);
+
+    res.status(500).json({
+        message: err.message,
+        name: err.name,
+    });
+}
 router.put('/:id', auth, upload.single('photo'), async (req, res) => {
   try {
     const { name, descr, category, order } = req.body;
