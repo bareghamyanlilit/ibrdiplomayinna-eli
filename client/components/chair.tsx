@@ -6,6 +6,7 @@
 import { P } from "@/components/descr";
 import { useLanguage } from "@/context/LangContext";
 import { useEffect, useState } from "react";
+import Loading from "./Loading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -27,9 +28,9 @@ export function Chair({ id }: { id: string | number }) {
   useEffect(() => {
     const isMongoId = typeof id === "string" && id.length === 24;
     if (isMongoId) {
-      fetch(`${API}/chairs/${id}`).then(r => r.json()).then(d => { if (d._id) { setChairData(d); setUseApi(true); } }).catch(() => {});
+      fetch(`${API}/chairs/${id}`).then(r => r.json()).then(d => { if (d._id) { setChairData(d); setUseApi(true); } }).catch(() => { });
     } else {
-      fetch(`${API}/chairs`).then(r => r.json()).then(arr => { if (Array.isArray(arr) && arr[Number(id)]) { setChairData(arr[Number(id)]); setUseApi(true); } }).catch(() => {});
+      fetch(`${API}/chairs`).then(r => r.json()).then(arr => { if (Array.isArray(arr) && arr[Number(id)]) { setChairData(arr[Number(id)]); setUseApi(true); } }).catch(() => { });
     }
   }, [id]);
 
@@ -37,7 +38,7 @@ export function Chair({ id }: { id: string | number }) {
 
   if (!useApi) {
     return (
-      <div className="container w-[90%] sm:w-[80%] mx-auto">load</div>
+      <Loading />
     );
   }
 

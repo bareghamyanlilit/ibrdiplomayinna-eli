@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { H2 } from "./title";
 import { useLanguage } from "@/context/LangContext";
 import { P } from "./descr";
+import Loading from "./Loading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -30,7 +31,7 @@ export function Staff() {
   if (!useApi) {
     // Fallback static
     return (
-      <div className="Staff container w-[90%] sm:w-[80%] mx-auto bg-white">Load</div>
+      <Loading/>
     );
   }
 

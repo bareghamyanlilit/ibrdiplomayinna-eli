@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LangContext";
 import Image from "next/image";
 import Link from "next/link";
 import { H2 } from "./title";
+import Loading from "./Loading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -22,14 +23,15 @@ export function Chairs() {
     fetch(`${API}/chairs`)
       .then(r => r.json())
       .then(d => { if (Array.isArray(d) && d.length > 0) { setItems(d); setUseApi(true); } })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const imgSrc = (src: string) => src?.startsWith("/uploads") ? `${SERVER}${src}` : src;
 
   if (!useApi) {
     return (
-      <div>Load </div>
+
+      <Loading />
     );
   }
 

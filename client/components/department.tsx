@@ -7,6 +7,7 @@ import { P } from "@/components/descr";
 import Image from "next/image";
 import { useLanguage } from "@/context/LangContext";
 import { useState, useEffect } from "react";
+import Loading from "./Loading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -53,7 +54,8 @@ export function Department({ id }: { id: string | number }) {
   // Fallback: use static data by index
   if (!useApi) {
     return (
-      <div className="masn">Load </div>
+      
+            <Loading/>
     );
   }
 

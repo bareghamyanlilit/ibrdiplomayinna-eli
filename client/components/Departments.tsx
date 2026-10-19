@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LangContext";
 import Image from "next/image";
 import Link from "next/link";
+import Loading from "./Loading";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "/api";
 const SERVER = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -39,7 +40,8 @@ export function Departments() {
   // Fallback to static data
   if (!useApi) {
     return (
-      <div className="DepartmentsPage">Load</div>
+      
+            <Loading/>
     );
   }
 
