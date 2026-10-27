@@ -113,7 +113,12 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
   const [childImgFile, setChildImgFile] = useState<File | null>(null);
   const [infoPartsTitle, setInfoPartsTitle] = useState<LText>(initial?.infoParts?.title || emptyLText());
   const [infoParts, setInfoParts] = useState<InfoPartLocal[]>(
-    (initial?.infoParts?.info || []).map((p: any) => ({ imgUrl: p.img || '', title: p.title || emptyLText(), desc: p.desc || emptyLText() }))
+    (initial?.infoParts?.info || []).map((p: any) => ({
+      imgUrl: p.img || "",
+      imgFile: undefined,
+      title: p.title || emptyLText(),
+      desc: p.desc || emptyLText(),
+    }))
   );
   const [existingImages, setExistingImages] = useState<string[]>(initial?.images || []);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
@@ -193,6 +198,21 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
         newImageFiles.map((file) => uploadToCloudinary(file, 'image'))
       );
 
+      const uploadedInfoParts = await Promise.all(
+        infoParts.map(async (part) => {
+          const imgUrl = part.imgFile
+            ? await uploadToCloudinary(part.imgFile, 'image')
+            : part.imgUrl;
+
+          return {
+            img: imgUrl,
+            title: part.title,
+            desc: part.desc,
+          };
+        })
+      );
+
+
       // Բաժնի տվյալներն այլևս չեն պարունակում մեծ ֆայլեր։
       const payload = {
         color,
@@ -212,14 +232,12 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
         partImgTitleEn: partImgTitle.en,
         order: String(order),
         isPublished: String(isPublished),
+
         infoParts: JSON.stringify({
           title: infoPartsTitle,
-          info: infoParts.map((p) => ({
-            img: p.imgUrl,
-            title: p.title,
-            desc: p.desc,
-          })),
+          info: uploadedInfoParts,
         }),
+
         existingImages: [...existingImages, ...uploadedImageUrls],
       };
 
@@ -312,10 +330,49 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
               <X size={16} />
             </button>
             <p className="text-xs font-bold text-gray-500">Info Part #{i + 1}</p>
+
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Նկար URL կամ վերբեռնիր</label>
-              <input value={part.imgUrl} onChange={e => setInfoParts(p => p.map((x, idx) => idx === i ? { ...x, imgUrl: e.target.value } : x))} placeholder="https://..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] mb-1" />
+              <label className="block text-xs font-semibold text-gray-600 mb-1">
+                Նկար URL կամ վերբեռնիր
+              </label>
+
+              <input
+                value={part.imgUrl}
+                onChange={(e) =>
+                  setInfoParts((p) =>
+                    p.map((x, idx) =>
+                      idx === i ? { ...x, imgUrl: e.target.value } : x
+                    )
+                  )
+                }
+                placeholder="https://..."
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#004471] mb-2"
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+
+                  if (file) {
+                    setInfoParts((p) =>
+                      p.map((x, idx) =>
+                        idx === i ? { ...x, imgFile: file } : x
+                      )
+                    );
+                  }
+                }}
+                className="w-full text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-[#004471] file:px-3 file:py-2 file:text-white hover:file:opacity-90"
+              />
+
+              {part.imgFile && (
+                <p className="mt-1 text-xs text-green-700">
+                  Ընտրված է՝ {part.imgFile.name}
+                </p>
+              )}
             </div>
+
             <LangTabs>
               {(lang) => (
                 <div className="space-y-2">
