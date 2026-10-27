@@ -47,25 +47,89 @@ export default function ChairForm({ initial }: { initial?: any }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true); setError('');
+
+    setLoading(true);
+    setError('');
+
     try {
-      const fd = new FormData();
-      fd.append('titleAm', title.am); fd.append('titleRu', title.ru); fd.append('titleEn', title.en);
-      fd.append('descrAm', descr.am); fd.append('descrRu', descr.ru); fd.append('descrEn', descr.en);
-      fd.append('bossName', bossName); fd.append('bossDescr', bossDescr); fd.append('bossSrc', bossSrc);
-      fd.append('imgUrl', imgUrl);
-      fd.append('staff', staff);
-      fd.append('order', String(order));
-      if (bossFile) fd.append('bossPhoto', bossFile);
-      if (imgFile) fd.append('img', imgFile);
-      if (isEdit) await api.put(`/chairs/${initial._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/chairs', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const uploadToCloudinary = async (
+        file: File
+      ): Promise<string> => {
+        const { data: sign } = await api.post('/uploads/sign', {
+          resourceType: 'image',
+        });
+
+        const cloudinaryForm = new FormData();
+        cloudinaryForm.append('file', file);
+        cloudinaryForm.append('api_key', sign.apiKey);
+        cloudinaryForm.append('timestamp', String(sign.timestamp));
+        cloudinaryForm.append('signature', sign.signature);
+        cloudinaryForm.append('folder', sign.folder);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: cloudinaryForm,
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.secure_url) {
+          throw new Error(
+            result.error?.message || 'Նկարի վերբեռնումը ձախողվեց'
+          );
+        }
+
+        return result.secure_url;
+      };
+
+      // Վերբեռնում ենք միայն նոր ընտրված նկարները։
+      const uploadedImgUrl = imgFile
+        ? await uploadToCloudinary(imgFile)
+        : imgUrl;
+
+      const uploadedBossSrc = bossFile
+        ? await uploadToCloudinary(bossFile)
+        : bossSrc;
+
+      const payload = {
+        titleAm: title.am,
+        titleRu: title.ru,
+        titleEn: title.en,
+        descrAm: descr.am,
+        descrRu: descr.ru,
+        descrEn: descr.en,
+        bossName,
+        bossDescr,
+        bossSrc: uploadedBossSrc,
+        imgUrl: uploadedImgUrl,
+        staff,
+        order: String(order),
+      };
+
+      if (isEdit) {
+        await api.put(`/chairs/${initial._id}`, payload);
+      } else {
+        await api.post('/chairs', payload);
+      }
+
       router.push('/dashboard/chairs');
-    } catch (err: any) { setError(err?.response?.data?.message || 'Սխալ'); }
-    finally { setLoading(false); }
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Սխալ տեղի ունեցավ'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">

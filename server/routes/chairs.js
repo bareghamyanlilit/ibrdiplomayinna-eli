@@ -1,127 +1,138 @@
+
 const router = require('express').Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const Chair = require('../models/Chair');
 const auth = require('../middleware/auth');
 
-// Uploads papki stexcum ethe chka
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const normalizeStaff = (staff) => {
+    if (Array.isArray(staff)) return staff;
+    if (typeof staff === 'string') {
+        try {
+            const parsed = JSON.parse(staff);
+            if (Array.isArray(parsed)) return parsed;
+        } catch {}
 
-// Ambioni nkar ev nakhagahi lusankar upload-i hamar
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-const upload = multer({ storage });
+        return staff.split('\n').filter(Boolean);
+    }
+    return [];
+};
 
-// GET / — bolor ambionnery stanel, dashavoracvac order-ov
+// GET / — բոլոր ամբիոնները
 router.get('/', async (req, res) => {
-  try {
-    const items = await Chair.find().sort({ order: 1 });
-    res.json(items);
-  } catch (err) {
-    console.error('UPDATE  ERROR:', err);
-
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+    try {
+        const items = await Chair.find().sort({ order: 1 });
+        res.json(items);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
-// GET /:id — mi ambion stanel id-ov
+// GET /:id — մեկ ամբիոն
 router.get('/:id', async (req, res) => {
-  try {
-    const item = await Chair.findById(req.params.id);
-    if (!item) return res.status(404).json({ message: 'Not found' });
-    res.json(item);
-  } catch (err) {
-    console.error('UPDATE  ERROR:', err);
+    try {
+        const item = await Chair.findById(req.params.id);
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+        if (!item) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        res.json(item);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
-// POST / — nory ambion stexcel (autentificacum + nkar ev nakhagahi lusankar upload)
-// staff-y gali e arrayic kkam newline-separated text-ic
-router.post('/', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'bossPhoto', maxCount: 1 }]), async (req, res) => {
-  try {
-    const b = req.body;
-    const files = req.files || {};
-    const staffList = b.staff ? (Array.isArray(b.staff) ? b.staff : b.staff.split('\n').filter(Boolean)) : [];
-    const item = await Chair.create({
-      title: { am: b.titleAm, ru: b.titleRu || '', en: b.titleEn || '' },
-      descr: { am: b.descrAm || '', ru: b.descrRu || '', en: b.descrEn || '' },
-      img: files.img ? `/uploads/${files.img[0].filename}` : (b.imgUrl || ''),
-      boss: {
-        name: b.bossName || '',
-        descr: b.bossDescr || '',
-        src: files.bossPhoto ? `/uploads/${files.bossPhoto[0].filename}` : (b.bossSrc || ''),
-      },
-      staff: staffList,
-      order: Number(b.order) || 0,
-    });
-    res.status(201).json(item);
-  } catch (err) {
-    console.error('UPDATE  ERROR:', err);
+// POST / — նոր ամբիոն
+router.post('/', auth, async (req, res) => {
+    try {
+        const b = req.body;
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+        const item = await Chair.create({
+            title: {
+                am: b.titleAm || '',
+                ru: b.titleRu || '',
+                en: b.titleEn || '',
+            },
+            descr: {
+                am: b.descrAm || '',
+                ru: b.descrRu || '',
+                en: b.descrEn || '',
+            },
+            img: b.imgUrl || '',
+            boss: {
+                name: b.bossName || '',
+                descr: b.bossDescr || '',
+                src: b.bossSrc || '',
+            },
+            staff: normalizeStaff(b.staff),
+            order: Number(b.order) || 0,
+        });
+
+        res.status(201).json(item);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
-// PUT /:id — arsknacnem ambion-y id-ov
-// Ethe nkary chi poxvac, pahum enq egacy
-router.put('/:id', auth, upload.fields([{ name: 'img', maxCount: 1 }, { name: 'bossPhoto', maxCount: 1 }]), async (req, res) => {
-  try {
-    const b = req.body;
-    const files = req.files || {};
-    const existing = await Chair.findById(req.params.id);
-    if (!existing) return res.status(404).json({ message: 'Not found' });
-    const staffList = b.staff ? (Array.isArray(b.staff) ? b.staff : b.staff.split('\n').filter(Boolean)) : [];
-    const item = await Chair.findByIdAndUpdate(req.params.id, {
-      title: { am: b.titleAm, ru: b.titleRu || '', en: b.titleEn || '' },
-      descr: { am: b.descrAm || '', ru: b.descrRu || '', en: b.descrEn || '' },
-      img: files.img ? `/uploads/${files.img[0].filename}` : (b.imgUrl || existing.img || ''),
-      boss: {
-        name: b.bossName || '',
-        descr: b.bossDescr || '',
-        src: files.bossPhoto ? `/uploads/${files.bossPhoto[0].filename}` : (b.bossSrc || existing.boss?.src || ''),
-      },
-      staff: staffList,
-      order: Number(b.order) || 0,
-    }, { new: true });
-    res.json(item);
-  } catch (err) {
-    console.error('UPDATE  ERROR:', err);
+// PUT /:id — խմբագրել ամբիոնը
+router.put('/:id', auth, async (req, res) => {
+    try {
+        const b = req.body;
+        const existing = await Chair.findById(req.params.id);
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+        if (!existing) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        const item = await Chair.findByIdAndUpdate(
+            req.params.id,
+            {
+                title: {
+                    am: b.titleAm ?? existing.title?.am ?? '',
+                    ru: b.titleRu ?? existing.title?.ru ?? '',
+                    en: b.titleEn ?? existing.title?.en ?? '',
+                },
+                descr: {
+                    am: b.descrAm ?? existing.descr?.am ?? '',
+                    ru: b.descrRu ?? existing.descr?.ru ?? '',
+                    en: b.descrEn ?? existing.descr?.en ?? '',
+                },
+                img: b.imgUrl || existing.img || '',
+                boss: {
+                    name: b.bossName ?? existing.boss?.name ?? '',
+                    descr: b.bossDescr ?? existing.boss?.descr ?? '',
+                    src: b.bossSrc || existing.boss?.src || '',
+                },
+                staff:
+                    b.staff !== undefined
+                        ? normalizeStaff(b.staff)
+                        : existing.staff,
+                order:
+                    b.order !== undefined
+                        ? Number(b.order) || 0
+                        : existing.order,
+            },
+            { new: true, runValidators: true }
+        );
+
+        res.json(item);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
-// DELETE /:id — jnjel ambion-y
+// DELETE /:id — ջնջել ամբիոնը
 router.delete('/:id', auth, async (req, res) => {
-  try {
-    await Chair.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Deleted' });
-  } catch (err) {
-    console.error('UPDATE  ERROR:', err);
+    try {
+        const item = await Chair.findByIdAndDelete(req.params.id);
 
-    res.status(500).json({
-        message: err.message,
-        name: err.name,
-    });
-}
+        if (!item) {
+            return res.status(404).json({ message: 'Not found' });
+        }
+
+        res.json({ message: 'Deleted' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 module.exports = router;
