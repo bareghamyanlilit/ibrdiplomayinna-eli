@@ -25,10 +25,10 @@ router.get('/', async (req, res) => {
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
     res.status(500).json({
-        message: err.message,
-        name: err.name,
+      message: err.message,
+      name: err.name,
     });
-}
+  }
 });
 
 // GET /admin — BOLOR masnagitvutyunnery admin-i hamar (autentificacum petk e)
@@ -40,10 +40,10 @@ router.get('/admin', auth, async (req, res) => {
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
     res.status(500).json({
-        message: err.message,
-        name: err.name,
+      message: err.message,
+      name: err.name,
     });
-}
+  }
 });
 
 // GET /:id — mi masnagitvutyun stanel id-ov
@@ -56,10 +56,10 @@ router.get('/:id', async (req, res) => {
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
     res.status(500).json({
-        message: err.message,
-        name: err.name,
+      message: err.message,
+      name: err.name,
     });
-}
+  }
 });
 
 // POST / — nory masnagitvutyun stexcel (autentificacum + multi-file upload)
@@ -94,10 +94,10 @@ router.post('/', auth, upload.fields([
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
     res.status(500).json({
-        message: err.message,
-        name: err.name,
+      message: err.message,
+      name: err.name,
     });
-}
+  }
 });
 
 // PUT /:id — arsknacnem masnagitvutyuny id-ov
@@ -171,8 +171,13 @@ router.put(
           ru: b.shortTitleRu || '',
           en: b.shortTitleEn || '',
         },
-        video: b.videoUrl || existing.video || '',
-        childImg: b.childImgUrl || existing.childImg || '',
+        video: files.video?.[0]
+          ? `/uploads/${files.video[0].filename}`
+          : b.videoUrl || existing.video || '',
+
+        childImg: files.childImg?.[0]
+          ? `/uploads/${files.childImg[0].filename}`
+          : b.childImgUrl || existing.childImg || '',
         infoParts,
         images: [...keptImages, ...newImages],
         partImgTitle: {
@@ -214,10 +219,10 @@ router.delete('/:id', auth, async (req, res) => {
     console.error('UPDATE DEPARTMENT ERROR:', err);
 
     res.status(500).json({
-        message: err.message,
-        name: err.name,
+      message: err.message,
+      name: err.name,
     });
-}
+  }
 });
 
 module.exports = router;
