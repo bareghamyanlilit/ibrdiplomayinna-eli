@@ -48,9 +48,9 @@ export default function LibraryAdminPage() {
   const getSpecKey = (s: any) => typeof s === 'string' ? s : (s?.am || '');
   const specialties = Array.from(
     new Map(
-        items.map(i => [getSpecKey(i.specialty), i.specialty])
+      items.map(i => [getSpecKey(i.specialty), i.specialty])
     ).values()
-);
+  );
   const filtered = items.filter(i => {
     const displayName = typeof i.name === 'string' ? i.name : (i.name?.am || '');
     const ms = !search || displayName.toLowerCase().includes(search.toLowerCase()) || i.fileName?.toLowerCase().includes(search.toLowerCase());
@@ -67,26 +67,96 @@ export default function LibraryAdminPage() {
   const close = () => { setEditItem(null); setNewFile(null); setError(''); };
 
   const save = async () => {
-    if (!editItem?.specialty?.am) { setError('Մասնագիտությունը պարտադիր է'); return; }
-    if (!editItem._id && !newFile) { setError('Ֆայլ ընտրեք'); return; }
-    setSaving(true); setError('');
+    if (!editItem?.specialty?.am) {
+      setError('Մասնագիտությունը պարտադիր է');
+      return;
+    }
+
+    if (!editItem._id && !newFile) {
+      setError('Ֆայլ ընտրեք');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
     try {
-      const fd = new FormData();
-      fd.append('nameAm', editItem.name.am || newFile?.name || '');
-      fd.append('nameRu', editItem.name.ru || '');
-      fd.append('nameEn', editItem.name.en || '');
-      fd.append('specialtyAm', editItem.specialty.am);
-      fd.append('specialtyRu', editItem.specialty.ru || editItem.specialty.am);
-      fd.append('specialtyEn', editItem.specialty.en || editItem.specialty.am);
-      fd.append('order', String(editItem.order || 0));
-      fd.append('isPublished', String(editItem.isPublished !== false));
-      if (newFile) fd.append('file', newFile);
-      if (editItem._id) await api.put(`/library/${editItem._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/library', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      close(); load();
-    } catch (err: any) { setError(err?.response?.data?.message || 'Սխալ'); }
-    finally { setSaving(false); }
+      let fileUrl = editItem.filePath || '';
+      let fileName = editItem.fileName || '';
+      let fileSize = editItem.fileSize || 0;
+      let mimeType = editItem.mimeType || 'application/octet-stream';
+
+      if (newFile) {
+        // 1. Ստանալ Cloudinary-ի ստորագրման տվյալները
+        const { data: sign } = await api.post('/uploads/sign', {
+          resourceType: 'raw',
+        });
+
+        // 2. Ֆայլն ուղարկել Cloudinary
+        const formData = new FormData();
+        formData.append('file', newFile);
+        formData.append('api_key', sign.apiKey);
+        formData.append('timestamp', String(sign.timestamp));
+        formData.append('signature', sign.signature);
+        formData.append('folder', sign.folder);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${sign.cloudName}/raw/upload`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.secure_url) {
+          throw new Error(
+            result.error?.message || 'Ֆայլի վերբեռնումը ձախողվեց'
+          );
+        }
+
+        fileUrl = result.secure_url;
+        fileName = newFile.name;
+        fileSize = newFile.size;
+        mimeType = newFile.type || 'application/octet-stream';
+      }
+
+      // 3. Պահպանել ֆայլի տվյալները MongoDB-ում
+      const payload = {
+        nameAm: editItem.name.am || fileName,
+        nameRu: editItem.name.ru || '',
+        nameEn: editItem.name.en || '',
+        specialtyAm: editItem.specialty.am,
+        specialtyRu: editItem.specialty.ru || editItem.specialty.am,
+        specialtyEn: editItem.specialty.en || editItem.specialty.am,
+        order: Number(editItem.order) || 0,
+        isPublished: editItem.isPublished !== false,
+        fileUrl,
+        fileName,
+        fileSize,
+        mimeType,
+      };
+
+      if (editItem._id) {
+        await api.put(`/library/${editItem._id}`, payload);
+      } else {
+        await api.post('/library', payload);
+      }
+
+      close();
+      await load();
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Սխալ տեղի ունեցավ'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   const del = async (id: string) => {
     if (!confirm('Ջնջե՞լ ֆայլը')) return;
@@ -144,8 +214,19 @@ export default function LibraryAdminPage() {
                       <p className="text-xs text-gray-400">{f.fileName} · {fmtSize(f.fileSize)} {!f.isPublished && '· Թաքցված'}</p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
-                      <a href={`${SERVER}${f.filePath}`} download target="_blank" rel="noreferrer"
-                        className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"><Download size={14} /></a>
+                      <a
+                        href={
+                          f.filePath?.startsWith('http')
+                            ? f.filePath
+                            : `${SERVER}${f.filePath}`
+                        }
+                        target="_blank"
+                        rel="noreferrer"
+                        download
+                        className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      >
+                        <Download size={14} />
+                      </a>
                       <button onClick={() => openEdit(f)} className="p-1.5 text-gray-400 hover:text-[#004471] hover:bg-blue-50 rounded-lg transition-colors"><Pencil size={14} /></button>
                       <button onClick={() => del(f._id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={14} /></button>
                     </div>

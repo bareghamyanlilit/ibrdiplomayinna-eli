@@ -44,7 +44,7 @@ app.post('/api/uploads/sign', auth, (req, res) => {
         const { resourceType } = req.body;
 
         // Թույլատրում ենք միայն նկարներ և վիդեոներ
-        if (!['image', 'video'].includes(resourceType)) {
+        if (!['image', 'video','raw'].includes(resourceType)) {
             return res.status(400).json({
                 message: 'Անթույլատրելի ֆայլի տեսակ',
             });
