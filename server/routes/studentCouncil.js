@@ -1,24 +1,7 @@
+
 const router = require('express').Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const StudentCouncil = require('../models/studentCouncil');
 const auth = require('../middleware/auth');
-
-// Uploads papki stexcum ethe chka
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-// Upload setup
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
-});
 
 // GET all
 router.get('/', async (req, res) => {
@@ -45,20 +28,22 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// CREATE
-router.post('/', auth, upload.single('photo'), async (req, res) => {
+// CREATE — նկարը նախապես վերբեռնվում է Cloudinary
+router.post('/', auth, async (req, res) => {
   try {
-    const { name, descr, position, order } = req.body;
+    const { name, descr, position, order, src } = req.body;
 
-    const src = req.file
-      ? `/uploads/${req.file.filename}`
-      : (req.body.src || '');
+    if (src && !/^https:\/\/res\.cloudinary\.com\//.test(src)) {
+      return res.status(400).json({
+        message: 'Նկարի Cloudinary URL-ն անվավեր է',
+      });
+    }
 
     const item = await StudentCouncil.create({
       name,
       descr,
-      src,
       position,
+      src: src || '',
       order: Number(order) || 0,
     });
 
@@ -69,9 +54,9 @@ router.post('/', auth, upload.single('photo'), async (req, res) => {
 });
 
 // UPDATE
-router.put('/:id', auth, upload.single('photo'), async (req, res) => {
+router.put('/:id', auth, async (req, res) => {
   try {
-    const { name, descr, position, order } = req.body;
+    const { name, descr, position, order, src } = req.body;
 
     const existing = await StudentCouncil.findById(req.params.id);
 
@@ -79,20 +64,25 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
       return res.status(404).json({ message: 'Not found' });
     }
 
-    const src = req.file
-      ? `/uploads/${req.file.filename}`
-      : (req.body.src || existing.src);
+    if (src && !/^https:\/\/res\.cloudinary\.com\//.test(src)) {
+      return res.status(400).json({
+        message: 'Նկարի Cloudinary URL-ն անվավեր է',
+      });
+    }
 
     const item = await StudentCouncil.findByIdAndUpdate(
       req.params.id,
       {
-        name,
-        descr,
-        src,
-        position,
-        order: Number(order) || 0,
+        name: name ?? existing.name,
+        descr: descr ?? existing.descr,
+        position: position ?? existing.position,
+        src: src ?? existing.src,
+        order:
+          order !== undefined
+            ? Number(order) || 0
+            : existing.order,
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     res.json(item);
@@ -101,14 +91,16 @@ router.put('/:id', auth, upload.single('photo'), async (req, res) => {
   }
 });
 
-// DELETE
+// DELETE — հեռացնում ենք MongoDB-ի գրառումը
 router.delete('/:id', auth, async (req, res) => {
   try {
-    await StudentCouncil.findByIdAndDelete(req.params.id);
+    const item = await StudentCouncil.findByIdAndDelete(req.params.id);
 
-    res.json({
-      message: 'Deleted',
-    });
+    if (!item) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
