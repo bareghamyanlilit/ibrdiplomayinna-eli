@@ -132,43 +132,115 @@ export default function DepartmentForm({ initial }: { initial?: Dept }) {
   const updateInfoPart = (i: number, field: string, lang: Lang, val: string) =>
     setInfoParts(p => p.map((part, idx) => idx === i ? { ...part, [field]: { ...(part as any)[field], [lang]: val } } : part));
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.am) { setError('Հայերեն անվանումը պարտադիր է'); return; }
-    setLoading(true); setError('');
+
+    if (!title.am) {
+      setError('Հայերեն անվանումը պարտադիր է');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
-      const fd = new FormData();
-      fd.append('color', color);
-      fd.append('titleAm', title.am); fd.append('titleRu', title.ru); fd.append('titleEn', title.en);
-      fd.append('descrAm', descr.am); fd.append('descrRu', descr.ru); fd.append('descrEn', descr.en);
-      fd.append('shortTitleAm', shortTitle.am); fd.append('shortTitleRu', shortTitle.ru); fd.append('shortTitleEn', shortTitle.en);
-      fd.append('videoUrl', videoUrl);
-      fd.append('childImgUrl', childImgUrl);
-      fd.append('partImgTitleAm', partImgTitle.am); fd.append('partImgTitleRu', partImgTitle.ru); fd.append('partImgTitleEn', partImgTitle.en);
-      fd.append('order', String(order));
-      fd.append('isPublished', String(isPublished));
-      if (videoFile) fd.append('video', videoFile);
-      if (childImgFile) fd.append('childImg', childImgFile);
+      // Ֆայլը անմիջապես Cloudinary է ուղարկվում։
+      const uploadToCloudinary = async (
+        file: File,
+        resourceType: 'image' | 'video'
+      ): Promise<string> => {
+        const { data: sign } = await api.post('/uploads/sign', {
+          resourceType,
+        });
 
-      const infoPartsData = {
-        title: infoPartsTitle,
-        info: infoParts.map(p => ({ img: p.imgUrl, title: p.title, desc: p.desc })),
+        const cloudinaryForm = new FormData();
+        cloudinaryForm.append('file', file);
+        cloudinaryForm.append('api_key', sign.apiKey);
+        cloudinaryForm.append('timestamp', String(sign.timestamp));
+        cloudinaryForm.append('signature', sign.signature);
+        cloudinaryForm.append('folder', sign.folder);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${sign.cloudName}/${resourceType}/upload`,
+          {
+            method: 'POST',
+            body: cloudinaryForm,
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.secure_url) {
+          throw new Error(
+            result.error?.message || 'Ֆայլի վերբեռնումը ձախողվեց'
+          );
+        }
+
+        return result.secure_url;
       };
-      fd.append('infoParts', JSON.stringify(infoPartsData));
 
-      existingImages.forEach(img => fd.append('existingImages', img));
-      newImageFiles.forEach(f => fd.append('images', f));
+      // Նոր ֆայլերը վերբեռնում ենք առանձին։
+      const uploadedVideoUrl = videoFile
+        ? await uploadToCloudinary(videoFile, 'video')
+        : videoUrl;
+
+      const uploadedChildImgUrl = childImgFile
+        ? await uploadToCloudinary(childImgFile, 'image')
+        : childImgUrl;
+
+      const uploadedImageUrls = await Promise.all(
+        newImageFiles.map((file) => uploadToCloudinary(file, 'image'))
+      );
+
+      // Բաժնի տվյալներն այլևս չեն պարունակում մեծ ֆայլեր։
+      const payload = {
+        color,
+        titleAm: title.am,
+        titleRu: title.ru,
+        titleEn: title.en,
+        descrAm: descr.am,
+        descrRu: descr.ru,
+        descrEn: descr.en,
+        shortTitleAm: shortTitle.am,
+        shortTitleRu: shortTitle.ru,
+        shortTitleEn: shortTitle.en,
+        videoUrl: uploadedVideoUrl,
+        childImgUrl: uploadedChildImgUrl,
+        partImgTitleAm: partImgTitle.am,
+        partImgTitleRu: partImgTitle.ru,
+        partImgTitleEn: partImgTitle.en,
+        order: String(order),
+        isPublished: String(isPublished),
+        infoParts: JSON.stringify({
+          title: infoPartsTitle,
+          info: infoParts.map((p) => ({
+            img: p.imgUrl,
+            title: p.title,
+            desc: p.desc,
+          })),
+        }),
+        existingImages: [...existingImages, ...uploadedImageUrls],
+      };
 
       if (isEdit) {
-        await api.put(`/departments/${initial!._id}`, fd);
+        await api.put(`/departments/${initial!._id}`, payload);
       } else {
-        await api.post('/departments', fd);
+        await api.post('/departments', payload);
       }
+
       router.push('/dashboard/departments');
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Սխալ տեղի ունեցավ');
-    } finally { setLoading(false); }
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Սխալ տեղի ունեցավ'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl">
