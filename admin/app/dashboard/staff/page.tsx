@@ -36,23 +36,78 @@ export default function StaffAdminPage() {
   const openEdit = (item: StaffMember) => { setEditItem({ ...item }); setPhotoFile(null); setError(''); };
   const closeModal = () => { setEditItem(null); setPhotoFile(null); };
 
+
   const save = async () => {
-    if (!editItem?.name) { setError('Անունը պարտադիր է'); return; }
-    setSaving(true); setError('');
+    if (!editItem?.name) {
+      setError('Անունը պարտադիր է');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
     try {
-      const fd = new FormData();
-      fd.append('name', editItem.name || '');
-      fd.append('descr', editItem.descr || '');
-      fd.append('src', editItem.src || '');
-      fd.append('category', editItem.category || 'boss');
-      fd.append('order', String(editItem.order || 0));
-      if (photoFile) fd.append('photo', photoFile);
-      if (editItem._id) await api.put(`/staff/${editItem._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      else await api.post('/staff', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      closeModal(); load();
-    } catch (err: any) { setError(err?.response?.data?.message || 'Սխալ'); }
-    finally { setSaving(false); }
+      let uploadedSrc = editItem.src || '';
+
+      if (photoFile) {
+        const { data: sign } = await api.post('/uploads/sign', {
+          resourceType: 'image',
+        });
+
+        const form = new FormData();
+        form.append('file', photoFile);
+        form.append('api_key', sign.apiKey);
+        form.append('timestamp', String(sign.timestamp));
+        form.append('signature', sign.signature);
+        form.append('folder', sign.folder);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: form,
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.secure_url) {
+          throw new Error(
+            result.error?.message || 'Նկարի վերբեռնումը ձախողվեց'
+          );
+        }
+
+        uploadedSrc = result.secure_url;
+      }
+
+      const payload = {
+        name: editItem.name,
+        descr: editItem.descr || '',
+        src: uploadedSrc,
+        category: editItem.category || 'boss',
+        order: Number(editItem.order) || 0,
+      };
+
+      if (editItem._id) {
+        await api.put(`/staff/${editItem._id}`, payload);
+      } else {
+        await api.post('/staff', payload);
+      }
+
+      setEditItem(null);
+      setPhotoFile(null);
+      await load();
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        'Սխալ տեղի ունեցավ'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
 
   const del = async (id: string) => {
     if (!confirm('Ջնջե՞լ')) return;
