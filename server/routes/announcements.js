@@ -1,33 +1,47 @@
+
 const router = require('express').Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const Announcement = require('../models/Announcement');
 const auth = require('../middleware/auth');
 
-// Uploads papki stexcum, ethe chka
-const uploadDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const parseImages = (value) => {
+  if (value === undefined || value === null) return null;
 
-// Multer-i karcavor konfiguraciya — fayl anvanacum enq Date.now() + bnagir anun
-const storage = multer.diskStorage({
-  destination: (_, __, cb) => cb(null, uploadDir),
-  filename: (_, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-// Fail hamary skagicel 10MB-ov
-const upload = multer({ storage, limits: { fileSize: 10 * 1024 * 1024 } });
+  if (Array.isArray(value)) {
+    return value.filter((url) => typeof url === 'string' && url.trim());
+  }
 
-// GET / — hryatarakac haytararutyunnery stanel (hamajvergi hamar)
+  if (typeof value === 'string') {
+    if (!value.trim()) return [];
+
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter(
+          (url) => typeof url === 'string' && url.trim()
+        );
+      }
+    } catch { }
+
+    return [value];
+  }
+
+  return [];
+};
+
+// GET / — հրապարակված հայտարարություններ
 router.get('/', async (req, res) => {
   try {
-    const items = await Announcement.find({ isPublished: true }).sort({ createdAt: -1 });
+    const items = await Announcement.find({
+      isPublished: true,
+    }).sort({ createdAt: -1 });
+
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// GET /admin — BOLOR haytararutyunnery stanel (admin panel-i hamar, autentificacum petk e)
+// GET /admin — բոլոր հայտարարությունները admin-ի համար
 router.get('/admin', auth, async (req, res) => {
   try {
     const items = await Announcement.find().sort({ createdAt: -1 });
@@ -37,69 +51,109 @@ router.get('/admin', auth, async (req, res) => {
   }
 });
 
-// GET /:id — mi haytararutyun stanel id-ov (hamajvergi hamar)
+// GET /:id — մեկ հայտարարություն
 router.get('/:id', async (req, res) => {
   try {
     const item = await Announcement.findById(req.params.id);
-    if (!item) return res.status(404).json({ message: 'Not found' });
+
+    if (!item) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
     res.json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// POST / — nory haytararutyun stexcel (autentificacum + nkarneri upload petk e)
-// am/ru/en vercnagrer, bovan, video URL, upToDate, hryatarakutyun
-router.post('/', auth, upload.array('images', 20), async (req, res) => {
+// POST / — ստեղծել հայտարարություն
+router.post('/', auth, async (req, res) => {
   try {
-    const { titleAm, titleRu, titleEn, contentAm, contentRu, contentEn, video, upToDate, isPublished } = req.body;
-    const images = req.files?.map((f) => `/uploads/${f.filename}`) || [];
+    const b = req.body;
+
+    const images = parseImages(b.images ?? b.existingImages) || [];
+
     const item = await Announcement.create({
-      title: { am: titleAm, ru: titleRu || '', en: titleEn || '' },
-      content: { am: contentAm, ru: contentRu || '', en: contentEn || '' },
-      video: video || '',
+      title: {
+        am: b.titleAm || '',
+        ru: b.titleRu || '',
+        en: b.titleEn || '',
+      },
+      content: {
+        am: b.contentAm || '',
+        ru: b.contentRu || '',
+        en: b.contentEn || '',
+      },
+      video: b.video || '',
       images,
-      upToDate: upToDate || '',
-      isPublished: isPublished !== 'false',
+      upToDate: b.upToDate || '',
+      isPublished:
+        b.isPublished === undefined
+          ? true
+          : b.isPublished === true || b.isPublished === 'true',
     });
+
     res.status(201).json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// PUT /:id — arsknacnem haytararutyuny id-ov
-// existingImages — nkarnery vor petk e paahel, nornery klcavor upload-i hamar
-router.put('/:id', auth, upload.array('images', 20), async (req, res) => {
+// PUT /:id — խմբագրել հայտարարություն
+router.put('/:id', auth, async (req, res) => {
   try {
-    const { titleAm, titleRu, titleEn, contentAm, contentRu, contentEn, video, upToDate, isPublished, existingImages } = req.body;
-    const newImages = req.files?.map((f) => `/uploads/${f.filename}`) || [];
-    const kept = existingImages ? (Array.isArray(existingImages) ? existingImages : [existingImages]) : [];
-    const images = [...kept, ...newImages];
+    const b = req.body;
+    const existing = await Announcement.findById(req.params.id);
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
+    // Եթե frontend-ը նոր նկարների հետ ուղարկում է պահպանվող
+    // նկարների ամբողջ ցանկը, օգտագործում ենք այդ ցանկը։
+    // Եթե նկարների դաշտ չկա, պահպանում ենք նախկին նկարները։
+    const images =
+      parseImages(b.images ?? b.existingImages) ?? existing.images ?? [];
 
     const item = await Announcement.findByIdAndUpdate(
       req.params.id,
       {
-        title: { am: titleAm, ru: titleRu || '', en: titleEn || '' },
-        content: { am: contentAm, ru: contentRu || '', en: contentEn || '' },
-        video: video || '',
+        title: {
+          am: b.titleAm ?? existing.title?.am ?? '',
+          ru: b.titleRu ?? existing.title?.ru ?? '',
+          en: b.titleEn ?? existing.title?.en ?? '',
+        },
+        content: {
+          am: b.contentAm ?? existing.content?.am ?? '',
+          ru: b.contentRu ?? existing.content?.ru ?? '',
+          en: b.contentEn ?? existing.content?.en ?? '',
+        },
+        video: b.video ?? existing.video ?? '',
         images,
-        upToDate: upToDate || '',
-        isPublished: isPublished !== 'false',
+        upToDate: b.upToDate ?? existing.upToDate ?? '',
+        isPublished:
+          b.isPublished === undefined
+            ? existing.isPublished
+            : b.isPublished === true || b.isPublished === 'true',
       },
-      { new: true }
+      { new: true, runValidators: true }
     );
-    if (!item) return res.status(404).json({ message: 'Not found' });
+
     res.json(item);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// DELETE /:id — jnjel haytararutyuny id-ov (autentificacum petk e)
+// DELETE /:id — ջնջել հայտարարություն
 router.delete('/:id', auth, async (req, res) => {
   try {
-    await Announcement.findByIdAndDelete(req.params.id);
+    const item = await Announcement.findByIdAndDelete(req.params.id);
+
+    if (!item) {
+      return res.status(404).json({ message: 'Not found' });
+    }
+
     res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });

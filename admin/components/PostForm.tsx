@@ -50,51 +50,110 @@ export default function PostForm({ type, initial }: PostFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.am || !content.am) { setError('Հայերեն վերնագիրն ու բովանդակությունը պարտադիր են'); return; }
-    setLoading(true); setError('');
-const convertVideoUrl = (url: string) => {
-  if (!url) return "";
 
-  if (url.includes("youtube.com/watch?v=")) {
-    const id = new URL(url).searchParams.get("v");
-    return `https://www.youtube.com/embed/${id}`;
-  }
+    if (!title.am || !content.am) {
+      setError('Հայերեն վերնագիրն ու բովանդակությունը պարտադիր են');
+      return;
+    }
 
-  if (url.includes("youtu.be/")) {
-    const id = url.split("youtu.be/")[1];
-    return `https://www.youtube.com/embed/${id}`;
-  }
+    setLoading(true);
+    setError('');
 
-  return url;
-};
-    try {
-      const fd = new FormData();
-      fd.append('titleAm', title.am);
-      fd.append('titleRu', title.ru);
-      fd.append('titleEn', title.en);
-      fd.append('contentAm', content.am);
-      fd.append('contentRu', content.ru);
-      fd.append('contentEn', content.en);
-      fd.append("video", convertVideoUrl(video));
-      fd.append('isPublished', String(isPublished));
-      if (type === 'announcements') fd.append('upToDate', upToDate);
-      existingImages.forEach((img) => fd.append('existingImages', img));
-      newFiles.forEach((f) => fd.append('images', f));
-      if (isEdit) {
-        await api.put(`/${type}/${initial!._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      } else {
-        await api.post(`/${type}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    const convertVideoUrl = (url: string) => {
+      if (!url) return '';
+
+      if (url.includes('youtube.com/watch?v=')) {
+        const id = new URL(url).searchParams.get('v');
+        return id ? `https://www.youtube.com/embed/${id}` : url;
       }
+
+      if (url.includes('youtu.be/')) {
+        const id = url.split('youtu.be/')[1]?.split(/[?&]/)[0];
+        return id ? `https://www.youtube.com/embed/${id}` : url;
+      }
+
+      return url;
+    };
+
+    try {
+      const uploadToCloudinary = async (file: File): Promise<string> => {
+        const { data: sign } = await api.post('/uploads/sign', {
+          resourceType: 'image',
+        });
+
+        const form = new FormData();
+        form.append('file', file);
+        form.append('api_key', sign.apiKey);
+        form.append('timestamp', String(sign.timestamp));
+        form.append('signature', sign.signature);
+        form.append('folder', sign.folder);
+
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${sign.cloudName}/image/upload`,
+          {
+            method: 'POST',
+            body: form,
+          }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.secure_url) {
+          throw new Error(
+            result.error?.message || 'Նկարի վերբեռնումը ձախողվեց'
+          );
+        }
+
+        return result.secure_url;
+      };
+
+      // Վերբեռնում ենք նոր նկարները Cloudinary
+      const uploadedImages = await Promise.all(
+        newFiles.map((file) => uploadToCloudinary(file))
+      );
+
+      // Պահպանում ենք ընտրված հին նկարներն ու ավելացնում նորերը
+      const images = [...existingImages, ...uploadedImages];
+
+      const payload = {
+        titleAm: title.am,
+        titleRu: title.ru,
+        titleEn: title.en,
+        contentAm: content.am,
+        contentRu: content.ru,
+        contentEn: content.en,
+        video: convertVideoUrl(video),
+        isPublished,
+        ...(type === 'announcements' ? { upToDate } : {}),
+        images,
+      };
+
+      if (isEdit) {
+        await api.put(`/${type}/${initial!._id}`, payload);
+      } else {
+        await api.post(`/${type}`, payload);
+      }
+
       router.push(`/dashboard/${type}`);
     } catch (err: unknown) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      setError(msg || 'Սխալ տեղի ունեցավ');
+      const error = err as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+
+      setError(
+        error.response?.data?.message ||
+        error.message ||
+        'Սխալ տեղի ունեցավ'
+      );
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
